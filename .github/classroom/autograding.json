@@ -1,0 +1,22 @@
+{
+  "tests": [
+    {
+      "name": "test resource",
+      "setup": "",
+      "run": "mvn -B -Dit.test=ConcertResourceIT verify --file pom.xml",
+      "input": "",
+      "output": "",
+      "timeout": 10,
+      "points": 10
+    },
+     {
+      "name": "test subscription",
+      "setup": "",
+      "run": "mvn -B -Dit.test=ConcertSubscriptionIT verify --file pom.xml",
+      "input": "",
+      "output": "",
+      "timeout": 10,
+      "points": 10
+    }
+   ]
+}
