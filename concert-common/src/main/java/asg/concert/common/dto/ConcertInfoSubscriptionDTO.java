@@ -1,5 +1,9 @@
 package asg.concert.common.dto;
 
+import asg.concert.common.jackson.LocalDateTimeDeserializer;
+import asg.concert.common.jackson.LocalDateTimeSerializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -36,6 +40,8 @@ public class ConcertInfoSubscriptionDTO {
         this.concertId = concertId;
     }
 
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     public LocalDateTime getDate() {
         return date;
     }
