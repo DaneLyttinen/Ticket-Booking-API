@@ -1,12 +1,14 @@
 package asg.concert.common.dto;
 
-import asg.concert.common.jackson.LocalDateTimeDeserializer;
-import asg.concert.common.jackson.LocalDateTimeSerializer;
+import asg.concert.common.jackson.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import javax.persistence.ElementCollection;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -26,6 +28,7 @@ public class ConcertDTO {
     private String title;
     private String imageName;
     private String blurb;
+    @ElementCollection
     private List<LocalDateTime> dates = new ArrayList<>();
     private List<PerformerDTO> performers = new ArrayList<>();
 
@@ -76,8 +79,8 @@ public class ConcertDTO {
         this.blurb = blurb;
     }
 
-    @JsonSerialize(using = LocalDateTimeSerializer.class)
-    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+   @JsonDeserialize(contentUsing = LocalDateTimeDeserializer.class)
+   @JsonSerialize(contentUsing = LocalDateTimeSerializer.class)
     public List<LocalDateTime> getDates() {
         return dates;
     }

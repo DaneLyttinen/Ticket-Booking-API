@@ -3,8 +3,12 @@ package asg.concert.service.domain;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+import asg.concert.common.jackson.LocalDateTimeDeserializer;
+import asg.concert.common.jackson.LocalDateTimeSerializer;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import javax.persistence.*;
 
@@ -15,17 +19,20 @@ public class Concert {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String title;
+
     //This will set a arbitrary length for the column so it can be inserted, otherwise it would have to pass as varchar(255) which the blurbs will not.
     @Column(columnDefinition="text")
     private String blurb;
-    private String image_name;
+    private String title;
+    @JsonSetter("imageName")
+    @Column(name = "image_name")
+    private String imageName;
     @ElementCollection
     @CollectionTable(
             name = "CONCERT_DATES",
             joinColumns = @JoinColumn(name = "CONCERT_ID"))
     @Column(name = "DATE")
-    private Set<LocalDateTime> dates = new HashSet<>();
+    private Set<LocalDateTime> dates;
 
     @JoinTable(
             name = "CONCERT_PERFORMER",
@@ -44,7 +51,7 @@ public class Concert {
     public Concert(Long id, String title, String image_name, Set<LocalDateTime> dates, Set<Performer> performer, String blurb) {
         this.id = id;
         this.title = title;
-        this.image_name = image_name;
+        this.imageName = image_name;
         this.dates = dates;
         this.performers = performer;
         this.blurb = blurb;
@@ -58,11 +65,12 @@ public class Concert {
     }
 
     public void setImage_name(String image_name) {
-        this.image_name = image_name;
+        this.imageName = image_name;
     }
 
+    @JsonGetter("imageName")
     public String getImage_name() {
-        return image_name;
+        return imageName;
     }
 
     public Long getId() {
@@ -81,6 +89,8 @@ public class Concert {
         this.title = title;
     }
 
+    @JsonDeserialize(contentUsing = LocalDateTimeDeserializer.class)
+    @JsonSerialize(contentUsing = LocalDateTimeSerializer.class)
     public Set<LocalDateTime> getDates() {
         return dates;
     }
