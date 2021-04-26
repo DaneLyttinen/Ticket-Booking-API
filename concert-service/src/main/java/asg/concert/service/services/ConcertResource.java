@@ -4,7 +4,8 @@ import asg.concert.common.dto.ConcertDTO;
 import asg.concert.common.dto.ConcertSummaryDTO;
 import asg.concert.service.common.Config;
 import asg.concert.service.domain.Concert;
-import asg.concert.service.mapper.concertMapper;
+import asg.concert.service.mapper.Mapper;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.slf4j.Logger;
@@ -46,8 +47,7 @@ public class ConcertResource {
             concert = em.find(Concert.class, id);
             // Use the EntityManager to retrieve, persist or delete object(s).
             // Use em.find(), em.persist(), em.merge(), etc...
-            concertMapper mapper = new concertMapper();
-            concertDTO = mapper.convertObjTOXXX(concert, new TypeReference<ConcertDTO>(){});
+            concertDTO = Mapper.concertToDTO(concert);
             //concertDTO = mapper.convertTo(concert);
             // Commit the transaction.
             em.getTransaction().commit();
@@ -77,10 +77,8 @@ public class ConcertResource {
             TypedQuery<Concert> concertQuery = em.createQuery("select c from Concert c", Concert.class);
             List<Concert> concerts = concertQuery.getResultList();
 
-            concertMapper mapper = new concertMapper();
             for (Concert concert : concerts){
-                ConcertDTO concertDTO = mapper.convertObjTOXXX(concert, new TypeReference<ConcertDTO>(){});
-                concertsDTO.add(concertDTO);
+                concertsDTO.add(Mapper.concertToDTO(concert));
             }
 
             //concertDTO = mapper.convertTo(concert);
@@ -112,13 +110,7 @@ public class ConcertResource {
 
             // create a summary for each concert
             for (Concert concert: concerts) {
-                ConcertSummaryDTO summary = new ConcertSummaryDTO(
-                    concert.getId(),
-                    concert.getTitle(),
-                    concert.getImage_name()
-                );
-
-                concertSummariesDTO.add(summary);
+                concertSummariesDTO.add(Mapper.concertToSummaryDTO(concert));
             }
 
             // Commit the transaction.
