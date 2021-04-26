@@ -1,6 +1,7 @@
 package asg.concert.service.services;
 
 import asg.concert.common.dto.ConcertDTO;
+import asg.concert.common.dto.ConcertSummaryDTO;
 import asg.concert.service.common.Config;
 import asg.concert.service.domain.Concert;
 import asg.concert.service.mapper.concertMapper;
@@ -94,5 +95,44 @@ public class ConcertResource {
                 .entity(concertsDTO)
                 .build();
     }
-    
+
+    @GET
+    @Path("summaries")
+    @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
+    public Response getConcertSummaires() {
+        LOGGER.info("Retrieving all concert summaries: " );
+        EntityManager em = PersistenceManager.instance().createEntityManager();
+        List<ConcertSummaryDTO> concertSummariesDTO = new ArrayList<>();
+
+        try {
+            // start a new transaction
+            em.getTransaction().begin();
+            TypedQuery<Concert> concertQuery = em.createQuery("select c from Concert c", Concert.class);
+            List<Concert> concerts = concertQuery.getResultList();
+
+            // create a summary for each concert
+            for (Concert concert: concerts) {
+                ConcertSummaryDTO summary = new ConcertSummaryDTO(
+                    concert.getId(),
+                    concert.getTitle(),
+                    concert.getImage_name()
+                );
+
+                concertSummariesDTO.add(summary);
+            }
+
+            // Commit the transaction.
+            em.getTransaction().commit();
+
+
+        } finally {
+            // When you're done using the EntityManager, close it to free up resources.
+            em.close();
+        }
+        
+        return Response
+                .status(200)
+                .entity(concertSummariesDTO)
+                .build();
+    }
 }
