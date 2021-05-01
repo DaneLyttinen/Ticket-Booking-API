@@ -26,14 +26,14 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Path("/concert-service")
+@Path("/concert-service/concerts")
 public class ConcertResource {
 
     private static Logger LOGGER = LoggerFactory.getLogger(ConcertResource.class);
 
     // TODO Implement this.
     @GET
-    @Path("concerts/{id}")
+    @Path("{id}")
     @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response retrieveConcert(@PathParam("id") long id) {
         LOGGER.info("Retrieving concert with id: " + id);
@@ -69,7 +69,6 @@ public class ConcertResource {
     }
 
     @GET
-    @Path("concerts")
     @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response getAllConcerts(){
         LOGGER.info("Retrieving all concerts: " );
@@ -100,7 +99,7 @@ public class ConcertResource {
     }
 
     @GET
-    @Path("concerts/summaries")
+    @Path("summaries")
     @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response getConcertSummaries() {
         LOGGER.info("Retrieving all concert summaries: " );

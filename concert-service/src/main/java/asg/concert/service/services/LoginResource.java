@@ -40,15 +40,18 @@ public class LoginResource {
 
             // Start a new transaction.
             em.getTransaction().begin();
-            TypedQuery<User> concertQuery = em.createQuery("select u from User u", User.class);
+
             // Use the EntityManager to retrieve, persist or delete object(s).
             // Use em.find(), em.persist(), em.merge(), etc...
-            List<User> users = concertQuery.getResultList();
-            for (User userr : users){
-                if (userr.getUsername().equals(userDTO.getUsername()) && userr.getPassword().equals(userDTO.getPassword())){
-                    user = userr;
-                }
+            TypedQuery<User> userQuery = em.createQuery("select u from User u where Username='" + userDTO.getUsername() + "'", User.class);
+            List<User> users = userQuery.getResultList();
+
+            // there should only ever be one user with a given username
+            // check the passowrd matches
+            if (users.size() == 1 && users.get(0).getPassword().equals(userDTO.getPassword())) {
+                user = users.get(0);
             }
+            
             // Commit the transaction.
             em.getTransaction().commit();
         } finally {

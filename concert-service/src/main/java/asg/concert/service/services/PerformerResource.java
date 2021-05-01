@@ -17,13 +17,13 @@ import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 
-@Path("/concert-service")
+@Path("/concert-service/performers")
 public class PerformerResource {
 
     private static Logger LOGGER = LoggerFactory.getLogger(ConcertResource.class);
 
     @GET
-    @Path("performers/{id}")
+    @Path("{id}")
     @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response getPerformer(@PathParam("id") long id) {
         LOGGER.info("Retrieving performer with id: " + id);
@@ -59,7 +59,6 @@ public class PerformerResource {
     }
 
     @GET
-    @Path("performers")
     @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response getAllPerformers(){
         LOGGER.info("Retrieving all performers: " );
