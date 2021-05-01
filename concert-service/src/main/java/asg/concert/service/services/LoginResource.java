@@ -1,7 +1,78 @@
 package asg.concert.service.services;
 
-import javax.ws.rs.Path;
+import asg.concert.common.dto.ConcertDTO;
+import asg.concert.common.dto.PerformerDTO;
+import asg.concert.common.dto.UserDTO;
+import asg.concert.service.common.Config;
+import asg.concert.service.domain.Concert;
+import asg.concert.service.domain.Performer;
+import asg.concert.service.domain.User;
+import asg.concert.service.mapper.Mapper;
+import com.fasterxml.jackson.core.type.TypeReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Path("/login")
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.CookieParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.Cookie;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.NewCookie;
+import javax.ws.rs.core.Response;
+import java.util.List;
+import java.util.UUID;
+
+@Path("/concert-service/login")
 public class LoginResource {
+
+    private static Logger LOGGER = LoggerFactory.getLogger(ConcertResource.class);
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response login(UserDTO userDTO, @CookieParam("auth") Cookie clientId){
+        LOGGER.info("Trying to login with cookie" + clientId);
+        EntityManager em = PersistenceManager.instance().createEntityManager();
+        User user = null;
+        try {
+
+            // Start a new transaction.
+            em.getTransaction().begin();
+            TypedQuery<User> concertQuery = em.createQuery("select u from User u", User.class);
+            // Use the EntityManager to retrieve, persist or delete object(s).
+            // Use em.find(), em.persist(), em.merge(), etc...
+            List<User> users = concertQuery.getResultList();
+            for (User userr : users){
+                if (userr.getUsername().equals(userDTO.getUsername()) && userr.getPassword().equals(userDTO.getPassword())){
+                    user = userr;
+                }
+            }
+            // Commit the transaction.
+            em.getTransaction().commit();
+        } finally {
+            // When you're done using the EntityManager, close it to free up resources.
+            em.close();
+        }
+        if (user == null){
+            return Response.status(401).build();
+        }
+
+        return Response
+                .status(200)
+                .cookie(makeCookie(clientId))
+                .build();
+    }
+
+    private NewCookie makeCookie(Cookie clientId) {
+        NewCookie newCookie = null;
+
+        if (clientId == null) {
+            newCookie = new NewCookie(Config.CLIENT_COOKIE, UUID.randomUUID().toString());
+            LOGGER.info("Generated cookie: " + newCookie.getValue());
+        }
+
+        return newCookie;
+    }
 }
