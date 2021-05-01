@@ -48,6 +48,10 @@ public class ConcertResource {
             // Use em.find(), em.persist(), em.merge(), etc...
             concert = em.find(Concert.class, id);
 
+            // Had to move back the mapper as otherwise we would get a LazyLoadException with Dates.
+            // As we are in a try block, if concert couldn't be found it will just stay as null
+            concertDTO = Mapper.convertObj(concert,  new TypeReference<ConcertDTO>(){});
+
             // Commit the transaction.
             em.getTransaction().commit();
         } finally {
@@ -57,9 +61,6 @@ public class ConcertResource {
         if (concert == null){
             throw new WebApplicationException(Response.Status.NOT_FOUND);
         }
-        
-        // Convert to DTO after confirming concert is not null
-        concertDTO = Mapper.concertToDTO(concert);
 
         return Response
                 .status(200)
@@ -82,7 +83,7 @@ public class ConcertResource {
             List<Concert> concerts = concertQuery.getResultList();
             
             for (Concert concert : concerts){
-                concertDTOs.add(Mapper.concertToDTO(concert));
+                concertDTOs.add(Mapper.convertObj(concert, new TypeReference<ConcertDTO>(){}));
             }
 
             // Commit the transaction.
@@ -101,7 +102,7 @@ public class ConcertResource {
     @GET
     @Path("concerts/summaries")
     @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
-    public Response getConcertSummaires() {
+    public Response getConcertSummaries() {
         LOGGER.info("Retrieving all concert summaries: " );
         EntityManager em = PersistenceManager.instance().createEntityManager();
         List<ConcertSummaryDTO> concertSummariesDTO = new ArrayList<>();
@@ -132,69 +133,4 @@ public class ConcertResource {
                 .build();
     }
 
-    @GET
-    @Path("performers/{id}")
-    @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
-    public Response getPerformer(@PathParam("id") long id) {
-        LOGGER.info("Retrieving performer with id: " + id);
-        EntityManager em = PersistenceManager.instance().createEntityManager();
-        Performer performer = null;
-        PerformerDTO performerDTO = null;
-        try {
-
-            // Start a new transaction.
-            em.getTransaction().begin();
-            
-            // Use the EntityManager to retrieve, persist or delete object(s).
-            // Use em.find(), em.persist(), em.merge(), etc...
-            performer = em.find(Performer.class, id);
-            
-            // Commit the transaction.
-            em.getTransaction().commit();
-        } finally {
-            // When you're done using the EntityManager, close it to free up resources.
-            em.close();
-        }
-        if (performer == null){
-            return Response.status(404).build();
-        }
-        
-        // Convert to DTO after confirming performer is not null
-        performerDTO = Mapper.performerToDTO(performer);
-
-        return Response
-                .status(200)
-                .entity(performerDTO)
-                .build();
-    }
-
-    @GET
-    @Path("performers")
-    @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
-    public Response getAllPerformers(){
-        LOGGER.info("Retrieving all performers: " );
-        EntityManager em = PersistenceManager.instance().createEntityManager();
-        List<PerformerDTO> performerDTOs = new ArrayList<>();
-        try {
-
-            // Start a new transaction.
-            em.getTransaction().begin();
-            TypedQuery<Performer> performerQuery = em.createQuery("select p from Performer p", Performer.class);
-            List<Performer> performers = performerQuery.getResultList();
-            
-            for (Performer performer : performers){
-                performerDTOs.add(Mapper.performerToDTO(performer));
-            }
-
-            // Commit the transaction.
-            em.getTransaction().commit();
-        } finally {
-            // When you're done using the EntityManager, close it to free up resources.
-            em.close();
-        }
-        return Response
-                .status(200)
-                .entity(performerDTOs)
-                .build();
-    }
 }

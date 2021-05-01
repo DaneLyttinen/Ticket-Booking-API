@@ -21,6 +21,7 @@ public class ConcertApplication extends Application {
     public ConcertApplication() {
         classes.add(TestResource.class);
         classes.add(ConcertResource.class);
+        classes.add(PerformerResource.class);
         singletons.add(PersistenceManager.instance());
 
         ConcertUtils.initConcerts();
