@@ -5,6 +5,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.math.BigDecimal;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * DTO class to represent seats at the concert venue.
  * <p>
@@ -12,6 +14,7 @@ import java.math.BigDecimal;
  * label    the seat label
  * price    the price
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SeatDTO {
 
     private String label;
