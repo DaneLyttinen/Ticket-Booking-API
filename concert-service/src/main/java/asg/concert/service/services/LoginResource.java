@@ -1,14 +1,8 @@
 package asg.concert.service.services;
 
-import asg.concert.common.dto.ConcertDTO;
-import asg.concert.common.dto.PerformerDTO;
 import asg.concert.common.dto.UserDTO;
 import asg.concert.service.common.Config;
-import asg.concert.service.domain.Concert;
-import asg.concert.service.domain.Performer;
 import asg.concert.service.domain.User;
-import asg.concert.service.mapper.Mapper;
-import com.fasterxml.jackson.core.type.TypeReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,18 +16,22 @@ import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @Path("/concert-service/login")
 public class LoginResource {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(ConcertResource.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(LoginResource.class);
+
+    private static ArrayList<String> validCookies = new ArrayList<>();
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response login(UserDTO userDTO, @CookieParam("auth") Cookie clientId){
-        LOGGER.info("Trying to login with cookie" + clientId);
+    public Response login(UserDTO userDTO, @CookieParam(Config.CLIENT_COOKIE) Cookie clientId){
+        LOGGER.info("Trying to login with cookie: " + clientId);
         EntityManager em = PersistenceManager.instance().createEntityManager();
         User user = null;
         try {
@@ -74,8 +72,17 @@ public class LoginResource {
         if (clientId == null) {
             newCookie = new NewCookie(Config.CLIENT_COOKIE, UUID.randomUUID().toString());
             LOGGER.info("Generated cookie: " + newCookie.getValue());
+            validCookies.add(newCookie.getValue());
         }
 
         return newCookie;
+    }
+
+    public static boolean isCookieValid(Cookie clientId) {
+        if (clientId == null) {
+            return false;
+        }
+
+        return validCookies.contains(clientId.getValue());
     }
 }

@@ -20,7 +20,7 @@ import java.util.List;
 @Path("/concert-service/performers")
 public class PerformerResource {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(ConcertResource.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(PerformerResource.class);
 
     @GET
     @Path("{id}")

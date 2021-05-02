@@ -31,7 +31,6 @@ public class ConcertResource {
 
     private static Logger LOGGER = LoggerFactory.getLogger(ConcertResource.class);
 
-    // TODO Implement this.
     @GET
     @Path("{id}")
     @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
