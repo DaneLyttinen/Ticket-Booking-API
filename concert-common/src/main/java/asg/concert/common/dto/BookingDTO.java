@@ -2,6 +2,8 @@ package asg.concert.common.dto;
 
 import asg.concert.common.jackson.LocalDateTimeDeserializer;
 import asg.concert.common.jackson.LocalDateTimeSerializer;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -15,6 +17,7 @@ import java.util.List;
  * date        the date on which that concert was booked
  * seats       the seats which were booked for that concert on that date
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class BookingDTO {
 
     private long concertId;

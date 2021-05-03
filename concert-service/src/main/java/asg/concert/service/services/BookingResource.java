@@ -1,5 +1,8 @@
 package asg.concert.service.services;
 
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -12,6 +15,10 @@ import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import asg.concert.common.dto.BookingDTO;
+import asg.concert.common.dto.ConcertDTO;
+import asg.concert.service.mapper.Mapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +38,7 @@ public class BookingResource {
         if (!LoginResource.isCookieValid(clientId)) {
             return Response.status(401).build();
         }
-
+        BookingDTO abookingDTO = null;
         EntityManager em = PersistenceManager.instance().createEntityManager();
         try {
 
@@ -41,17 +48,17 @@ public class BookingResource {
 
             // TEMPORARY CODE HERE just for the SeatResource tests
             // -------------
-            TypedQuery<Seat> seatQuery = em.createQuery("select s from Seat s where date='2020-02-15 20:00:00'", Seat.class);
+            TypedQuery<Seat> seatQuery = em.createQuery("select s from Seat s where date='"+bookingDTO.getDate()+"'", Seat.class);
             List<Seat> seats = seatQuery.getResultList();
 
             for (Seat seat: seats) {
-                if (seat.getLabel().equals("C5") || seat.getLabel().equals("C6")) {
+                if (bookingDTO.getSeatLabels().contains(seat.getLabel())) {
                     seat.setBooked(true);
                     em.persist(seat);
                 }
             }
             // -------------
-
+            abookingDTO =  Mapper.convertObj(bookingDTO,  new TypeReference<BookingDTO>(){});
             em.getTransaction().commit();
 
         }
@@ -59,6 +66,10 @@ public class BookingResource {
             em.close();    
         }
 
-        return Response.status(404).build();
+        return Response
+                .created(URI.create("/bookings/" + abookingDTO))
+                .status(201)
+                .entity(abookingDTO)
+                .build();
     }
 }
