@@ -4,13 +4,11 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.CookieParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -30,6 +28,7 @@ import asg.concert.service.domain.Seat;
 public class BookingResource {
 
     private static Logger LOGGER = LoggerFactory.getLogger(BookingResource.class);
+    private AtomicLong idCounter = new AtomicLong();
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -65,11 +64,40 @@ public class BookingResource {
         finally {
             em.close();    
         }
-
+        var id = idCounter.incrementAndGet();
         return Response
-                .created(URI.create("/bookings/" + abookingDTO))
+                .created(URI.create("/bookings/" + id))
                 .status(201)
-                .entity(abookingDTO)
                 .build();
     }
+
+    // TODO: implement this.
+//    @GET
+//    @Path("{id}")
+//    public Response getBooking(@PathParam("id") long id, @CookieParam(Config.CLIENT_COOKIE) Cookie clientId){
+//        EntityManager em = PersistenceManager.instance().createEntityManager();
+//        try {
+//
+//            // Start a new transaction.
+//            em.getTransaction().begin();
+//            Booking booking = em.find(booking.class, id);
+//            if (booking. cookie != clientId) {
+//                throw new WebApplicationException(Response.Status.NOT_FOUND);
+//            }
+//
+//            // Use the EntityManager to retrieve, persist or delete object(s).
+//            // Use em.find(), em.persist(), em.merge(), etc...
+//
+//            // Commit the transaction.
+//            em.getTransaction().commit();
+//
+//        } finally {
+//            // When you're done using the EntityManager, close it to free up resources.
+//            em.close();
+//        }
+//
+//        return Response
+//                .status(204)
+//                .build();
+//    }
 }
