@@ -2,9 +2,7 @@ package asg.concert.service.services;
 
 import java.net.URI;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.persistence.EntityManager;
@@ -17,6 +15,7 @@ import javax.ws.rs.ext.Provider;
 
 import asg.concert.common.dto.BookingDTO;
 import asg.concert.common.dto.ConcertDTO;
+import asg.concert.service.domain.Booking;
 import asg.concert.service.mapper.Mapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.slf4j.Logger;
@@ -42,7 +41,7 @@ public class BookingResource {
         }
 
         LOGGER.info("Attempting booking for concert (id: " + bookingRequestDTO.getConcertId() + ") on " + bookingRequestDTO.getDate().toString() + " for seats " + bookingRequestDTO.getSeatLabels().toString());
-
+        long id = 0;
         EntityManager em = PersistenceManager.instance().createEntityManager();
         try {
 
@@ -68,7 +67,7 @@ public class BookingResource {
             // get all seats in booking query
             TypedQuery<Seat> seatQuery = em.createQuery("select s from Seat s where date='" + requestDateTime + "' and label in " + requestLabelsList, Seat.class);
             List<Seat> seats = seatQuery.getResultList();
-            
+            Set<Seat> seatsSet = new HashSet<>();
             // if any of the seats are already booked, respond with error 403: forbidden
             for (Seat seat: seats) {
                 if (seat.isBooked()) {
@@ -84,29 +83,31 @@ public class BookingResource {
             for (Seat seat: seats) {
                 seat.setBooked(true);
                 em.persist(seat);
+                seatsSet.add(seat);
             }
-            
+
             // TODO: store this in database or something
-            BookingDTO bookingDTO = Mapper.convertObj(bookingRequestDTO,  new TypeReference<BookingDTO>(){});
-
+            id = idCounter.incrementAndGet();
+            Booking booking = new Booking(id, bookingRequestDTO.getConcertId(), bookingRequestDTO.getDate(), seatsSet, clientId.getValue());
+            em.persist(booking);
             em.getTransaction().commit();
-
         }
         finally {
             em.close();    
         }
 
-        var id = idCounter.incrementAndGet();
+
         return Response
-                .created(URI.create("/bookings/" + id))
+                .created(URI.create("/concert-service/bookings/" + id))
                 .status(201)
                 .build();
     }
 
 
     @GET
+    @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUsersBookings(@CookieParam(Config.CLIENT_COOKIE) Cookie clientId) {
+    public Response getUsersBookings(@PathParam("id") long id, @CookieParam(Config.CLIENT_COOKIE) Cookie clientId) {
         if (!LoginResource.isCookieValid(clientId)) {
             return Response.status(401).build();
         }
@@ -114,9 +115,34 @@ public class BookingResource {
         // TODO: responds with a list of BookingDTOs for the user
         // We could get the user based off the clientId if we store the cookies in the database
         // with a reference to the user the cookie is for
+        Booking booking = null;
+        BookingDTO bookingDTO = null;
+        EntityManager em = PersistenceManager.instance().createEntityManager();
+        try {
+
+            // Start a new transaction.
+            em.getTransaction().begin();
+            booking = em.find(Booking.class, id);
+            // Use the EntityManager to retrieve, persist or delete object(s).
+            // Use em.find(), em.persist(), em.merge(), etc...
+            if (!booking.cookie.equals(clientId.getValue())){
+                return Response.status(403).build();
+            }
+            bookingDTO = Mapper.convertObj(booking,  new TypeReference<BookingDTO>(){});
+            // Commit the transaction.
+            em.getTransaction().commit();
+
+        } finally {
+            // When you're done using the EntityManager, close it to free up resources.
+            em.close();
+        }
+        if (booking == null){
+            throw new WebApplicationException(Response.Status.NOT_FOUND);
+        }
 
         return Response
-                .status(404)
+                .status(201)
+                .entity(bookingDTO)
                 .build();
     }
 
