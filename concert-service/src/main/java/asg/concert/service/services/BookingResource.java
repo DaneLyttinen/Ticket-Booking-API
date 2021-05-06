@@ -87,9 +87,14 @@ public class BookingResource {
             }
 
             // TODO: store this in database or something
-            id = idCounter.incrementAndGet();
-            Booking booking = new Booking(id, bookingRequestDTO.getConcertId(), bookingRequestDTO.getDate(), seatsSet, clientId.getValue());
+            Booking booking = new Booking();
+            booking.seat = seatsSet;
+            booking.cookie = clientId.getValue();
+            booking.date = bookingRequestDTO.getDate();
+            booking.setConcertId(bookingRequestDTO.getConcertId());
+            //Booking booking = new Booking(id, bookingRequestDTO.getConcertId(), bookingRequestDTO.getDate(), seatsSet, clientId.getValue());
             em.persist(booking);
+            id = booking.getId();
             em.getTransaction().commit();
         }
         finally {
@@ -103,11 +108,40 @@ public class BookingResource {
                 .build();
     }
 
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllUsersBookings(@CookieParam(Config.CLIENT_COOKIE) Cookie clientId){
+        if (!LoginResource.isCookieValid(clientId)) {
+            return Response.status(401).build();
+        }
+        EntityManager em = PersistenceManager.instance().createEntityManager();
+        List<BookingDTO> bookingDTOS = new ArrayList<>();
+        try {
+
+            // Start a new transaction.
+            em.getTransaction().begin();
+            TypedQuery<Booking> bookingQuery = em.createQuery("select s from Booking s where cookie='" + clientId.getValue() + "'", Booking.class);
+            List<Booking> bookings = bookingQuery.getResultList();
+            for (Booking booking : bookings){
+                BookingDTO bookingDTO = Mapper.convertBooking(booking);
+                bookingDTOS.add(bookingDTO);
+            }
+            em.getTransaction().commit();
+
+        } finally {
+            // When you're done using the EntityManager, close it to free up resources.
+            em.close();
+        }
+        return  Response
+                .status(200)
+                .entity(bookingDTOS)
+                .build();
+    }
 
     @GET
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUsersBookings(@PathParam("id") long id, @CookieParam(Config.CLIENT_COOKIE) Cookie clientId) {
+    public Response getBookingById(@PathParam("id") long id, @CookieParam(Config.CLIENT_COOKIE) Cookie clientId) {
         if (!LoginResource.isCookieValid(clientId)) {
             return Response.status(401).build();
         }
@@ -123,12 +157,10 @@ public class BookingResource {
             // Start a new transaction.
             em.getTransaction().begin();
             booking = em.find(Booking.class, id);
-            // Use the EntityManager to retrieve, persist or delete object(s).
-            // Use em.find(), em.persist(), em.merge(), etc...
             if (!booking.cookie.equals(clientId.getValue())){
                 return Response.status(403).build();
             }
-            bookingDTO = Mapper.convertObj(booking,  new TypeReference<BookingDTO>(){});
+            bookingDTO = Mapper.convertBooking(booking);
             // Commit the transaction.
             em.getTransaction().commit();
 
@@ -141,7 +173,7 @@ public class BookingResource {
         }
 
         return Response
-                .status(201)
+                .status(200)
                 .entity(bookingDTO)
                 .build();
     }

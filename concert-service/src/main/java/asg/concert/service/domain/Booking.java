@@ -20,7 +20,7 @@ public class Booking {
 
     @Id
     // remove this if using explicit id
-    //@GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     public LocalDateTime date;
     private long concertId;
