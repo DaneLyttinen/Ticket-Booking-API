@@ -34,6 +34,7 @@ public class LoginResource {
         LOGGER.info("Trying to login with cookie: " + clientId);
         EntityManager em = PersistenceManager.instance().createEntityManager();
         User user = null;
+
         try {
 
             // Start a new transaction.
@@ -49,7 +50,6 @@ public class LoginResource {
             if (users.size() == 1 && users.get(0).getPassword().equals(userDTO.getPassword())) {
                 user = users.get(0);
             }
-            
             // Commit the transaction.
             em.getTransaction().commit();
         } finally {
@@ -68,7 +68,9 @@ public class LoginResource {
 
     private NewCookie makeCookie(Cookie clientId) {
         NewCookie newCookie = null;
-
+        if (isCookieValid(clientId)){
+            clientId = null;
+        }
         if (clientId == null) {
             newCookie = new NewCookie(Config.CLIENT_COOKIE, UUID.randomUUID().toString());
             LOGGER.info("Generated cookie: " + newCookie.getValue());

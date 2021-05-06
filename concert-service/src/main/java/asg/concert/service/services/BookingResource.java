@@ -152,12 +152,14 @@ public class BookingResource {
         Booking booking = null;
         BookingDTO bookingDTO = null;
         EntityManager em = PersistenceManager.instance().createEntityManager();
+        LOGGER.info("Attempting to get booking with user " + clientId.getValue() );
         try {
 
             // Start a new transaction.
             em.getTransaction().begin();
             booking = em.find(Booking.class, id);
-            if (!booking.cookie.equals(clientId.getValue())){
+            LOGGER.info("Attempting to get booking with (cookie: " + booking.getCookie() + ") with user " + clientId.getValue() );
+            if (!booking.getCookie().equals(clientId.getValue())){
                 return Response.status(403).build();
             }
             bookingDTO = Mapper.convertBooking(booking);
@@ -177,35 +179,4 @@ public class BookingResource {
                 .entity(bookingDTO)
                 .build();
     }
-
-
-    // TODO: implement this.
-//    @GET
-//    @Path("{id}")
-//    public Response getBooking(@PathParam("id") long id, @CookieParam(Config.CLIENT_COOKIE) Cookie clientId){
-//        EntityManager em = PersistenceManager.instance().createEntityManager();
-//        try {
-//
-//            // Start a new transaction.
-//            em.getTransaction().begin();
-//            Booking booking = em.find(booking.class, id);
-//            if (booking. cookie != clientId) {
-//                throw new WebApplicationException(Response.Status.NOT_FOUND);
-//            }
-//
-//            // Use the EntityManager to retrieve, persist or delete object(s).
-//            // Use em.find(), em.persist(), em.merge(), etc...
-//
-//            // Commit the transaction.
-//            em.getTransaction().commit();
-//
-//        } finally {
-//            // When you're done using the EntityManager, close it to free up resources.
-//            em.close();
-//        }
-//
-//        return Response
-//                .status(204)
-//                .build();
-//    }
 }
