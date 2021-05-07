@@ -16,6 +16,7 @@ import javax.ws.rs.ext.Provider;
 import asg.concert.common.dto.BookingDTO;
 import asg.concert.common.dto.ConcertDTO;
 import asg.concert.service.domain.Booking;
+import asg.concert.service.domain.User;
 import asg.concert.service.mapper.Mapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.slf4j.Logger;
@@ -30,13 +31,12 @@ import asg.concert.service.domain.Seat;
 public class BookingResource {
 
     private static Logger LOGGER = LoggerFactory.getLogger(BookingResource.class);
-    private AtomicLong idCounter = new AtomicLong();
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public Response makeBookingRequest(BookingRequestDTO bookingRequestDTO, @CookieParam(Config.CLIENT_COOKIE) Cookie clientId) {
         // Make sure client has valid cookie
-        if (!LoginResource.isCookieValid(clientId)) {
+        if (clientId == null) {
             return Response.status(401).build();
         }
 
@@ -85,11 +85,12 @@ public class BookingResource {
                 em.persist(seat);
                 seatsSet.add(seat);
             }
-
+            TypedQuery<User> userQuery = em.createQuery("select u from User u where cookie='" + clientId.getValue()+"'", User.class);
+            User user = userQuery.getSingleResult();
             // TODO: store this in database or something
             Booking booking = new Booking();
             booking.seat = seatsSet;
-            booking.cookie = clientId.getValue();
+            booking.user = user;
             booking.date = bookingRequestDTO.getDate();
             booking.setConcertId(bookingRequestDTO.getConcertId());
             //Booking booking = new Booking(id, bookingRequestDTO.getConcertId(), bookingRequestDTO.getDate(), seatsSet, clientId.getValue());
@@ -111,16 +112,17 @@ public class BookingResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllUsersBookings(@CookieParam(Config.CLIENT_COOKIE) Cookie clientId){
-        if (!LoginResource.isCookieValid(clientId)) {
+        if (clientId == null) {
             return Response.status(401).build();
         }
         EntityManager em = PersistenceManager.instance().createEntityManager();
         List<BookingDTO> bookingDTOS = new ArrayList<>();
         try {
-
+            TypedQuery<User> userQuery = em.createQuery("select u from User u where cookie='" + clientId.getValue() + "'", User.class);
+            User user = userQuery.getSingleResult();
             // Start a new transaction.
             em.getTransaction().begin();
-            TypedQuery<Booking> bookingQuery = em.createQuery("select s from Booking s where cookie='" + clientId.getValue() + "'", Booking.class);
+            TypedQuery<Booking> bookingQuery = em.createQuery("select s from Booking s where user.id='" + user.getId() + "'", Booking.class);
             List<Booking> bookings = bookingQuery.getResultList();
             for (Booking booking : bookings){
                 BookingDTO bookingDTO = Mapper.convertBooking(booking);
@@ -142,7 +144,7 @@ public class BookingResource {
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getBookingById(@PathParam("id") long id, @CookieParam(Config.CLIENT_COOKIE) Cookie clientId) {
-        if (!LoginResource.isCookieValid(clientId)) {
+        if (clientId == null) {
             return Response.status(401).build();
         }
 
@@ -158,8 +160,10 @@ public class BookingResource {
             // Start a new transaction.
             em.getTransaction().begin();
             booking = em.find(Booking.class, id);
-            LOGGER.info("Attempting to get booking with (cookie: " + booking.getCookie() + ") with user " + clientId.getValue() );
-            if (!booking.getCookie().equals(clientId.getValue())){
+            TypedQuery<User> userQuery = em.createQuery("select u from User u where cookie='" + clientId.getValue() + "'", User.class);
+            User user = userQuery.getSingleResult();
+            //LOGGER.info("Attempting to get booking with (cookie: " + booking.getCookie() + ") with user " + clientId.getValue() );
+            if (user != booking.user){
                 return Response.status(403).build();
             }
             bookingDTO = Mapper.convertBooking(booking);

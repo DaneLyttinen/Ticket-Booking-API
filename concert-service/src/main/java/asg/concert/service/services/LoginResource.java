@@ -26,15 +26,13 @@ public class LoginResource {
 
     private static Logger LOGGER = LoggerFactory.getLogger(LoginResource.class);
 
-    private static ArrayList<String> validCookies = new ArrayList<>();
-
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public Response login(UserDTO userDTO, @CookieParam(Config.CLIENT_COOKIE) Cookie clientId){
         LOGGER.info("Trying to login with cookie: " + clientId);
         EntityManager em = PersistenceManager.instance().createEntityManager();
         User user = null;
-
+        NewCookie cookie = null;
         try {
 
             // Start a new transaction.
@@ -49,6 +47,9 @@ public class LoginResource {
             // check the passowrd matches
             if (users.size() == 1 && users.get(0).getPassword().equals(userDTO.getPassword())) {
                 user = users.get(0);
+                cookie = makeCookie(null);
+                user.setCookie(cookie.getValue());
+                em.merge(user);
             }
             // Commit the transaction.
             em.getTransaction().commit();
@@ -62,29 +63,19 @@ public class LoginResource {
 
         return Response
                 .status(200)
-                .cookie(makeCookie(clientId))
+                .cookie(cookie)
                 .build();
     }
 
     private NewCookie makeCookie(Cookie clientId) {
         NewCookie newCookie = null;
-        if (isCookieValid(clientId)){
-            clientId = null;
-        }
+
         if (clientId == null) {
             newCookie = new NewCookie(Config.CLIENT_COOKIE, UUID.randomUUID().toString());
             LOGGER.info("Generated cookie: " + newCookie.getValue());
-            validCookies.add(newCookie.getValue());
         }
 
         return newCookie;
     }
 
-    public static boolean isCookieValid(Cookie clientId) {
-        if (clientId == null) {
-            return false;
-        }
-
-        return validCookies.contains(clientId.getValue());
-    }
 }

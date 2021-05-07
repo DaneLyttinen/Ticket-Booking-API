@@ -38,19 +38,19 @@ public class Booking {
     )
     public Set<Seat> seat = new HashSet<>();
 
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    public User user;
 
-    public String cookie;
-
-    public Booking(Long id, long concertId,LocalDateTime date, Set<Seat> seat, String cookie){
+    public Booking(Long id, long concertId,LocalDateTime date, Set<Seat> seat, User user){
         this.id = id;
         this.concertId = concertId;
         this.date = date;
         this.seat = seat;
-        this.cookie = cookie;
+        this.user = user;
     }
 
-    public Booking(long concertId, LocalDateTime date, Set<Seat> seat, String cookie) {
-        this(null, concertId, date, seat, cookie);
+    public Booking(long concertId, LocalDateTime date, Set<Seat> seat, User user) {
+        this(null, concertId, date, seat, user);
     }
 
     public Booking(){}
@@ -85,9 +85,9 @@ public class Booking {
         return seat;
     }
 
-    public String getCookie() {
-        return cookie;
+    public User getUser() {
+        return user;
     }
 
-    public void setCookie(String cookie){this.cookie = cookie;}
+    public void setUser(String cookie){this.user = user;}
 }
