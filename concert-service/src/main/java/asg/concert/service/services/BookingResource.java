@@ -2,9 +2,7 @@ package asg.concert.service.services;
 
 import java.net.URI;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.persistence.EntityManager;
@@ -17,6 +15,7 @@ import javax.ws.rs.ext.Provider;
 
 import asg.concert.common.dto.BookingDTO;
 import asg.concert.common.dto.ConcertDTO;
+import asg.concert.service.domain.Booking;
 import asg.concert.service.mapper.Mapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.slf4j.Logger;
@@ -42,7 +41,7 @@ public class BookingResource {
         }
 
         LOGGER.info("Attempting booking for concert (id: " + bookingRequestDTO.getConcertId() + ") on " + bookingRequestDTO.getDate().toString() + " for seats " + bookingRequestDTO.getSeatLabels().toString());
-
+        long id = 0;
         EntityManager em = PersistenceManager.instance().createEntityManager();
         try {
 
@@ -68,7 +67,7 @@ public class BookingResource {
             // get all seats in booking query
             TypedQuery<Seat> seatQuery = em.createQuery("select s from Seat s where date='" + requestDateTime + "' and label in " + requestLabelsList, Seat.class);
             List<Seat> seats = seatQuery.getResultList();
-            
+            Set<Seat> seatsSet = new HashSet<>();
             // if any of the seats are already booked, respond with error 403: forbidden
             for (Seat seat: seats) {
                 if (seat.isBooked()) {
@@ -84,29 +83,65 @@ public class BookingResource {
             for (Seat seat: seats) {
                 seat.setBooked(true);
                 em.persist(seat);
+                seatsSet.add(seat);
             }
-            
+
             // TODO: store this in database or something
-            BookingDTO bookingDTO = Mapper.convertObj(bookingRequestDTO,  new TypeReference<BookingDTO>(){});
-
+            Booking booking = new Booking();
+            booking.seat = seatsSet;
+            booking.cookie = clientId.getValue();
+            booking.date = bookingRequestDTO.getDate();
+            booking.setConcertId(bookingRequestDTO.getConcertId());
+            //Booking booking = new Booking(id, bookingRequestDTO.getConcertId(), bookingRequestDTO.getDate(), seatsSet, clientId.getValue());
+            em.persist(booking);
+            id = booking.getId();
             em.getTransaction().commit();
-
         }
         finally {
             em.close();    
         }
 
-        var id = idCounter.incrementAndGet();
+
         return Response
-                .created(URI.create("/bookings/" + id))
+                .created(URI.create("/concert-service/bookings/" + id))
                 .status(201)
                 .build();
     }
 
-
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUsersBookings(@CookieParam(Config.CLIENT_COOKIE) Cookie clientId) {
+    public Response getAllUsersBookings(@CookieParam(Config.CLIENT_COOKIE) Cookie clientId){
+        if (!LoginResource.isCookieValid(clientId)) {
+            return Response.status(401).build();
+        }
+        EntityManager em = PersistenceManager.instance().createEntityManager();
+        List<BookingDTO> bookingDTOS = new ArrayList<>();
+        try {
+
+            // Start a new transaction.
+            em.getTransaction().begin();
+            TypedQuery<Booking> bookingQuery = em.createQuery("select s from Booking s where cookie='" + clientId.getValue() + "'", Booking.class);
+            List<Booking> bookings = bookingQuery.getResultList();
+            for (Booking booking : bookings){
+                BookingDTO bookingDTO = Mapper.convertBooking(booking);
+                bookingDTOS.add(bookingDTO);
+            }
+            em.getTransaction().commit();
+
+        } finally {
+            // When you're done using the EntityManager, close it to free up resources.
+            em.close();
+        }
+        return  Response
+                .status(200)
+                .entity(bookingDTOS)
+                .build();
+    }
+
+    @GET
+    @Path("{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getBookingById(@PathParam("id") long id, @CookieParam(Config.CLIENT_COOKIE) Cookie clientId) {
         if (!LoginResource.isCookieValid(clientId)) {
             return Response.status(401).build();
         }
@@ -114,40 +149,34 @@ public class BookingResource {
         // TODO: responds with a list of BookingDTOs for the user
         // We could get the user based off the clientId if we store the cookies in the database
         // with a reference to the user the cookie is for
+        Booking booking = null;
+        BookingDTO bookingDTO = null;
+        EntityManager em = PersistenceManager.instance().createEntityManager();
+        LOGGER.info("Attempting to get booking with user " + clientId.getValue() );
+        try {
+
+            // Start a new transaction.
+            em.getTransaction().begin();
+            booking = em.find(Booking.class, id);
+            LOGGER.info("Attempting to get booking with (cookie: " + booking.getCookie() + ") with user " + clientId.getValue() );
+            if (!booking.getCookie().equals(clientId.getValue())){
+                return Response.status(403).build();
+            }
+            bookingDTO = Mapper.convertBooking(booking);
+            // Commit the transaction.
+            em.getTransaction().commit();
+
+        } finally {
+            // When you're done using the EntityManager, close it to free up resources.
+            em.close();
+        }
+        if (booking == null){
+            throw new WebApplicationException(Response.Status.NOT_FOUND);
+        }
 
         return Response
-                .status(404)
+                .status(200)
+                .entity(bookingDTO)
                 .build();
     }
-
-
-    // TODO: implement this.
-//    @GET
-//    @Path("{id}")
-//    public Response getBooking(@PathParam("id") long id, @CookieParam(Config.CLIENT_COOKIE) Cookie clientId){
-//        EntityManager em = PersistenceManager.instance().createEntityManager();
-//        try {
-//
-//            // Start a new transaction.
-//            em.getTransaction().begin();
-//            Booking booking = em.find(booking.class, id);
-//            if (booking. cookie != clientId) {
-//                throw new WebApplicationException(Response.Status.NOT_FOUND);
-//            }
-//
-//            // Use the EntityManager to retrieve, persist or delete object(s).
-//            // Use em.find(), em.persist(), em.merge(), etc...
-//
-//            // Commit the transaction.
-//            em.getTransaction().commit();
-//
-//        } finally {
-//            // When you're done using the EntityManager, close it to free up resources.
-//            em.close();
-//        }
-//
-//        return Response
-//                .status(204)
-//                .build();
-//    }
 }

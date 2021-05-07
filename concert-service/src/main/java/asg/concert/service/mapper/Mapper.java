@@ -6,6 +6,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 
 public class Mapper {
     public static <T> T convertObj(Object o, TypeReference ref){
@@ -20,4 +23,16 @@ public class Mapper {
                 concert.getImage_name()
         );
     }
+
+    public static BookingDTO convertBooking(Booking booking){
+        List<SeatDTO> seatDTOSet = new ArrayList<>();
+        for (Seat seat : booking.getSeat()){
+            SeatDTO seatDTO = Mapper.convertObj(seat, new TypeReference<SeatDTO>(){});
+            seatDTOSet.add(seatDTO);
+        }
+        BookingDTO bookingDTO = Mapper.convertObj(booking, new TypeReference<BookingDTO>(){});
+        bookingDTO.setSeats(seatDTOSet);
+        return  bookingDTO;
+    }
+
 }
