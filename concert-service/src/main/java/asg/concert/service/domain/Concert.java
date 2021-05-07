@@ -45,7 +45,7 @@ public class Concert {
                     referencedColumnName = "ID"
             )
     )
-    @OneToMany(cascade = CascadeType.PERSIST)
+    @ManyToMany(cascade = CascadeType.PERSIST)
     private Set<Performer> performers = new HashSet<>();
 
     public Concert(Long id, String title, String image_name, Set<LocalDateTime> dates, Set<Performer> performer, String blurb) {

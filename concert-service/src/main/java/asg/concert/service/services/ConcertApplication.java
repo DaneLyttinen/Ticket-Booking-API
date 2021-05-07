@@ -25,6 +25,7 @@ public class ConcertApplication extends Application {
         classes.add(LoginResource.class);
         classes.add(BookingResource.class);
         classes.add(SeatResource.class);
+        classes.add(SubscribeResource.class);
         singletons.add(PersistenceManager.instance());
 
         ConcertUtils.initConcerts();
