@@ -58,7 +58,7 @@ public class ConcertResource {
             em.close();
         }
         if (concert == null){
-            throw new WebApplicationException(Response.Status.NOT_FOUND);
+            return Response.status(404).build();
         }
 
         return Response

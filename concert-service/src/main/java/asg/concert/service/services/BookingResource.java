@@ -43,6 +43,8 @@ public class BookingResource {
         LOGGER.info("Attempting booking for concert (id: " + bookingRequestDTO.getConcertId() + ") on " + bookingRequestDTO.getDate().toString() + " for seats " + bookingRequestDTO.getSeatLabels().toString());
         long id = 0;
         EntityManager em = PersistenceManager.instance().createEntityManager();
+        Booking booking = new Booking();
+
         try {
 
             em.getTransaction().begin();
@@ -88,7 +90,6 @@ public class BookingResource {
             TypedQuery<User> userQuery = em.createQuery("select u from User u where cookie='" + clientId.getValue()+"'", User.class);
             User user = userQuery.getSingleResult();
             // TODO: store this in database or something
-            Booking booking = new Booking();
             booking.seat = seatsSet;
             booking.user = user;
             booking.date = bookingRequestDTO.getDate();
@@ -101,6 +102,9 @@ public class BookingResource {
         finally {
             em.close();    
         }
+
+        // Notify subscribers of this booking
+        SubscribeResource.bookingMade(booking);
 
 
         return Response
@@ -175,7 +179,7 @@ public class BookingResource {
             em.close();
         }
         if (booking == null){
-            throw new WebApplicationException(Response.Status.NOT_FOUND);
+            return Response.status(404).build();
         }
 
         return Response
