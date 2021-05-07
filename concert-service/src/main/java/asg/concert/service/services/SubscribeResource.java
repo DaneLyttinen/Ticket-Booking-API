@@ -40,8 +40,7 @@ public class SubscribeResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public void subscribeConcertInfo(ConcertInfoSubscriptionDTO concertInfoSubscriptionDTO, @Suspended AsyncResponse sub, @CookieParam(Config.CLIENT_COOKIE) Cookie clientId) {
-        // Make sure client has valid cookie
-        if (!LoginResource.isCookieValid(clientId)) {
+        if (clientId == null) {
             // Responses are made via the AsyncResponse object, so we return nothing
             sub.resume(Response.status(401).build());
             return;
