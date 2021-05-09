@@ -20,7 +20,7 @@ public class Mapper {
         return new ConcertSummaryDTO(
                 concert.getId(),
                 concert.getTitle(),
-                concert.getImage_name()
+                concert.getImageName()
         );
     }
 
