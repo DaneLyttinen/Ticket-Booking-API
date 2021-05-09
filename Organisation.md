@@ -26,8 +26,8 @@
 - We also decided to make a Booking domain model class, as a means to store booking information (this can be extended in the future to include payment information), as opposed to e.g. storing the seats the user has booked with a User, which isn't as extendable.
 
 - Concert has FetchMode subselect for its Performer collection field. As there will be multiple, we reduce the pre load by only fetching the performers for concerts when needed.
-- For Booking and Concert we want the collections of objects they store to be persisted when these are persisted, so these classes use FetchType.CASCADE. We don't use FetchType.REMOVE because want the colletions of objects they store (e.g. Performers) to live on even after a Booking or Concert is removed (which might be a feature that happens in the future). Booking uses Eager fetching for its seat collection as we deemed that most of the time, we'd
-be accessing the entirety of this collection.
+- For Booking and Concert we want the collections of objects they store to be persisted when these are persisted, so these classes use FetchType.CASCADE. We don't use FetchType.REMOVE because want the colletions of objects they store (e.g. Performers) to live on even after a Booking or Concert is removed (which might be a feature that happens in the future). 
+- Booking uses eager fetching for its Seat collection as we deemed that most of the time, we'd be accessing the entirety of this collection.
 
 - We wanted a way to persist a user’s token value in the database, so that we didn’t have to store this in memory (i.e. so that we could have “stateless services”).
 We decided to make a ‘token’ field in the User class to accomplish this. 
