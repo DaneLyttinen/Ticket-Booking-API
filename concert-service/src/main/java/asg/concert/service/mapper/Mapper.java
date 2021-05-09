@@ -26,7 +26,7 @@ public class Mapper {
 
     public static BookingDTO convertBooking(Booking booking){
         List<SeatDTO> seatDTOSet = new ArrayList<>();
-        for (Seat seat : booking.getSeat()){
+        for (Seat seat : booking.getSeats()){
             SeatDTO seatDTO = Mapper.convertObj(seat, new TypeReference<SeatDTO>(){});
             seatDTOSet.add(seatDTO);
         }

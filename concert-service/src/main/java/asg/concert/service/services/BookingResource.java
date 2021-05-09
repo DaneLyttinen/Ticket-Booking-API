@@ -214,34 +214,34 @@ public class BookingResource {
 
         EntityManager em = PersistenceManager.instance().createEntityManager();
 
-        Booking aBooking = null;
+        BookingDTO bookingDTO = null;
 
         try {
             em.getTransaction().begin();
 
             // 2) Get the booking information from the database 
-            aBooking = em.find(Booking.class, id);
+            Booking aBooking = em.find(Booking.class, id); // note: this has been lazily fetched (we don't want to actually go to the effort of getting the seat objects until we have authorised the user)
 
             if (aBooking == null) {
                 LOGGER.info("Booking does not exist with this id");
                 throw new WebApplicationException(Response.Status.BAD_REQUEST); // I don't think this is tested, but yep, a fitting status for this situation
             }
 
+            // 3)  Authorise
+            if (authenticatedUser.equals(aBooking.getUser())) {
+                LOGGER.info("Authorised. Client is the same person who made this booking");
+            } else {// ah: so we use forbidden when not authorised (And we used UNAUTHORISED when not authenticated) -- well, that's a shame.
+                LOGGER.info(String.format("Not Authorised. Client (user: '%s') is trying to access the booking of another user (user: '%s'). Client is only authorised to access their bookings. Throwing Response.Status.FORBIDDEN", authenticatedUser, aBooking.getUser()));
+                throw new WebApplicationException(Response.Status.FORBIDDEN); // you're trying to access the booking of another user ("you're not authorised to do that")
+            }
+
+            // 4) Instantiate and return BookingDTO
+            bookingDTO = Mapper.convertBooking(aBooking);
+
             em.getTransaction().commit();
         } finally {
             em.close();
         }
-
-        // 3)  Authorise
-        if (authenticatedUser.equals(aBooking.getUser())) {
-            LOGGER.info("Authorised. Client is the same person who made this booking");
-        } else {// ah: so we use forbidden when not authorised (And we used UNAUTHORISED when not authenticated) -- well, that's a shame.
-            LOGGER.info(String.format("Not Authorised. Client (user: '%s') is trying to access the booking of another user (user: '%s'). Client is only authorised to access their bookings. Throwing Response.Status.FORBIDDEN", authenticatedUser, aBooking.getUser()));
-            throw new WebApplicationException(Response.Status.FORBIDDEN); // you're trying to access the booking of another user ("you're not authorised to do that")
-        }
-
-        // 4) Instantiate and return BookingDTO
-        BookingDTO bookingDTO = Mapper.convertBooking(aBooking);
 
         return Response.status(Response.Status.OK).entity(bookingDTO).build();
     }
