@@ -22,7 +22,7 @@
 - ConcertService - you don't want to change concerts while users are reading them hence pessimistic read lock
 
 ### How domain model is organised:
-- We made Concert, Performer, and User domain model classes so that the code would work with db_init.sql. We also made a Seat domain model class, as the project files show this being peristed.
+- We made Concert, Performer, and User domain model classes so that the code would work with db_init.sql. We also made a Seat domain model class, as the project files show a Seat table in the database.
 - We also decided to make a Booking domain model class, as a means to store booking information (this can be extended in the future to include payment information), as opposed to e.g. storing the seats the user has booked with a User, which isn't as extendable.
 
 - Concert has FetchMode subselect for its Performer collection field. As there will be multiple, we reduce the pre load by only fetching the performers for concerts when needed.
