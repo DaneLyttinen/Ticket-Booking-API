@@ -15,8 +15,9 @@ public class Seat {
 	private String label;
 	private BigDecimal price;
 
-	public Seat() {}
+	public Seat() {} // JPA likes blank constructor
 
+	// this shouldn't be used directly by our code because the database makes the id
 	public Seat(Long id, String label, boolean isBooked, LocalDateTime date, BigDecimal price) {
 		this.id = id;
 		this.label = label;
@@ -27,6 +28,10 @@ public class Seat {
 
 	public Seat(String label, boolean isBooked, LocalDateTime date, BigDecimal price) {
 		this(null,label, isBooked, date, price);
+	}
+
+	public long getId() {
+		return this.id;
 	}
 
 	public void setLabel(String label) {

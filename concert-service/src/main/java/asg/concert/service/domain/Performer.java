@@ -20,9 +20,9 @@ public class Performer {
     @Column(columnDefinition="text")
     private String blurb;
 
-    public Performer() {
-    }
+    public Performer() {} // JPA likes blank constructor
 
+    // this shouldn't be used directly by our code because the database makes the id
     public Performer(Long id, String name, String imageName, Genre genre, String blurb) {
         this.id = id;
         this.name = name;

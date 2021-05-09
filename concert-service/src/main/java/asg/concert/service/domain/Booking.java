@@ -24,7 +24,7 @@ public class Booking {
     private long id;
     public LocalDateTime date;
     private long concertId;
-    @OneToMany(cascade = CascadeType.PERSIST)
+    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     @JoinTable(
             name = "BOOKING_SEAT",
             joinColumns = @JoinColumn(
@@ -38,19 +38,20 @@ public class Booking {
     )
     public Set<Seat> seat = new HashSet<>();
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne
     public User user;
 
-    public Booking(Long id, long concertId,LocalDateTime date, Set<Seat> seat, User user){
+    // this shouldn't be used directly by our code because the database makes the id
+    public Booking(long id, long concertId,LocalDateTime date, Set<Seat> seat, User user){ // constructor with all fields including id
+        this(concertId, date, seat, user);
         this.id = id;
+    }
+
+    public Booking(long concertId, LocalDateTime date, Set<Seat> seat, User user) { // contructor with all fields
         this.concertId = concertId;
         this.date = date;
         this.seat = seat;
         this.user = user;
-    }
-
-    public Booking(long concertId, LocalDateTime date, Set<Seat> seat, User user) {
-        this(null, concertId, date, seat, user);
     }
 
     public Booking(){}

@@ -48,6 +48,9 @@ public class Concert {
     @ManyToMany(cascade = CascadeType.PERSIST)
     private Set<Performer> performers = new HashSet<>();
 
+    public Concert() {} // JPA needs a blank constructor
+
+    // this shouldn't be used directly by our code because the database makes the id
     public Concert(Long id, String title, String image_name, Set<LocalDateTime> dates, Set<Performer> performer, String blurb) {
         this.id = id;
         this.title = title;
@@ -59,9 +62,6 @@ public class Concert {
 
     public Concert(String title,String image_name, Set<LocalDateTime> dates, Set<Performer> performer, String blurb) {
         this(null, title,image_name, dates, performer, blurb);
-    }
-
-    public Concert() {
     }
 
     public void setImage_name(String image_name) {
