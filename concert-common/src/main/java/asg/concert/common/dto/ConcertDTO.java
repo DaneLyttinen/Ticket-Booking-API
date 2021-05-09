@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import javax.persistence.ElementCollection;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -27,7 +28,7 @@ public class ConcertDTO {
     private String title;
     private String imageName;
     private String blurb;
-
+    @ElementCollection
     private List<LocalDateTime> dates = new ArrayList<>();
     private List<PerformerDTO> performers = new ArrayList<>();
 
@@ -78,8 +79,8 @@ public class ConcertDTO {
         this.blurb = blurb;
     }
 
-   @JsonDeserialize(contentUsing = LocalDateTimeDeserializer.class) // this is pretty cunning - we didn't have a collection of LocalDateTime in the lectures; for just LocalDateTime (not in a collection), we used 'using' - so it makes sense that for a collection, we use contentUsing (or rather: it makes sense that they'd choice that name)
-   @JsonSerialize(contentUsing = LocalDateTimeSerializer.class) // ^
+   @JsonDeserialize(contentUsing = LocalDateTimeDeserializer.class)
+   @JsonSerialize(contentUsing = LocalDateTimeSerializer.class)
     public List<LocalDateTime> getDates() {
         return dates;
     }

@@ -13,7 +13,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
@@ -35,7 +34,7 @@ public class PerformerResource {
      */
     @GET
     @Path("{id}")
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response getPerformer(@PathParam("id") long id) {
         LOGGER.info("Retrieving performer with id: " + id);
 
@@ -67,12 +66,12 @@ public class PerformerResource {
      * form of a list of PerformerDTOs. You don't have to be authenticated 
      * (and hence don't have to be authorised) to do this.
      * 
-     * There's no possibility that an error can happen , i.e., if no performers
+     * There's no possibility error that can happen, i.e., if no performers
      * exist, this just returns a empty list. So no error can be thrown by
      * this method. (Unless there's a mistake with the code)
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
     public Response getAllPerformers(){
         LOGGER.info("Retrieving all performers: ");
 

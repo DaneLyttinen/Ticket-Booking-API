@@ -13,15 +13,10 @@ public class Performer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String name;
-
-    @Column(name = "IMAGE_NAME")
-    private String imageName;
-
+    private String image_name;
     @Enumerated(EnumType.STRING)
     private Genre genre;
-
     @Column(columnDefinition="text")
     private String blurb;
 
@@ -31,7 +26,7 @@ public class Performer {
     public Performer(Long id, String name, String imageName, Genre genre, String blurb) {
         this.id = id;
         this.name = name;
-        this.imageName = imageName;
+        this.image_name = imageName;
         this.genre = genre;
         this.blurb = blurb;
     }
@@ -57,11 +52,11 @@ public class Performer {
     }
 
     public String getImageName() {
-        return imageName;
+        return image_name;
     }
 
     public void setImageName(String imageName) {
-        this.imageName = imageName;
+        this.image_name = imageName;
     }
 
     public Genre getGenre() {

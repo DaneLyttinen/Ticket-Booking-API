@@ -23,12 +23,10 @@ public class Concert {
     //This will set a arbitrary length for the column so it can be inserted, otherwise it would have to pass as varchar(255) which the blurbs will not.
     @Column(columnDefinition="text")
     private String blurb;
-
     private String title;
-
-    @Column(name = "IMAGE_NAME")
+    @JsonSetter("imageName")
+    @Column(name = "image_name")
     private String imageName;
-    
     @ElementCollection
     @CollectionTable(
             name = "CONCERT_DATES",
@@ -48,11 +46,7 @@ public class Concert {
             )
     )
     @ManyToMany(cascade = CascadeType.PERSIST)
-    private Set<Performer> performers; 
-    // indeed, Concert and Performers have a many to many relationship. 
-    // Note: this is unidirectional, and because this class does the storing, this class is the 'owner' to JPA (hence we don't need mappedBy)
-    // RE: CascadeType.PERSIST; this means when we persist the owner (which is this), the other side will be persisted too, which is what we want. 
-    // Note, We haven't done CascadeType.REMOVE as well, because a Performer shouldnt be removed when a Concert that has it is removed (which is what CascadeType.REMOVE does)
+    private Set<Performer> performers = new HashSet<>();
 
     public Concert() {} // JPA needs a blank constructor
 
@@ -70,64 +64,50 @@ public class Concert {
         this(null, title,image_name, dates, performer, blurb);
     }
 
-    // Getters and Setters for every field
-
-    public long getId() {
-        return this.id;
+    public void setImage_name(String image_name) {
+        this.imageName = image_name;
     }
 
-    public void setId(long id) {
+    @JsonGetter("imageName")
+    public String getImage_name() {
+        return imageName;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
         this.id = id;
     }
 
     public String getTitle() {
-        return this.title;
+        return title;
     }
 
     public void setTitle(String title) {
         this.title = title;
     }
 
-    public String getImageName() {
-        return this.imageName;
-    } 
-
-    public void setImageName(String imageName) {
-        this.imageName = imageName;
-    }
-
-    public String getBlurb() {
-        return this.blurb;
-    }
-
-    public void setBlurb(String blurb) {
-        this.blurb = blurb;
-    }
-
-    public Set<Performer> getPerformers() {
-        return this.performers;
-    }
-
-    public void setPerformers(Set<Performer> performers) {
-        this.performers = performers;
-    }
-
-    public Set<LocalDateTime> getDates() { // this was given to us; really dropping the hint that they want us to use Set<LocalTimeDate> ?
-        return this.dates;
+    @JsonDeserialize(contentUsing = LocalDateTimeDeserializer.class)
+    @JsonSerialize(contentUsing = LocalDateTimeSerializer.class)
+    public Set<LocalDateTime> getDates() {
+        return dates;
     }
 
     public void setDates(Set<LocalDateTime> dates) {
         this.dates = dates;
     }
 
-    // Nice to have, since these fields are collections
-
-    public void addPerformer(Performer performer) {
-        this.performers.add(performer);
+    public Set<Performer> getPerformers() {
+        return performers;
     }
 
-    public void addDate(LocalDateTime date) {
-        this.dates.add(date);
+    public void setBlurb(String blurb) {
+        this.blurb = blurb;
     }
 
+    public String getBlurb() {
+        return blurb;
+    }
 }

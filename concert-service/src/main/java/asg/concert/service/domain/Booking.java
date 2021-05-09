@@ -1,24 +1,30 @@
 package asg.concert.service.domain;
 
-import javax.persistence.*;
+import asg.concert.common.jackson.LocalDateTimeDeserializer;
+import asg.concert.common.jackson.LocalDateTimeSerializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import javax.persistence.*;
+import javax.ws.rs.CookieParam;
+import javax.ws.rs.core.Cookie;
+import java.lang.reflect.Array;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name="bookings") // to follow convention of the rest of the tables
+@Table(name="Bookings")
 public class Booking {
 
     @Id
+    // remove this if using explicit id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     public LocalDateTime date;
-    private long concertId; // perhaps it'd be cooler if it stored the concert object itself
-
-
-    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER) // indeed booking has a many to many relationship with seat (booking objects have a collection of seat objects; seat object can only have one booking object, because the seat is at a specific time. If not, this would be double booking)
+    private long concertId;
+    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     @JoinTable(
             name = "BOOKING_SEAT",
             joinColumns = @JoinColumn(
@@ -29,10 +35,10 @@ public class Booking {
                     name="SEAT_ID",
                     referencedColumnName = "ID"
             )
-    ) // This isn't in db_init.sql, i.e. it's not a requirement, this is just nice to have.
-    public Set<Seat> seats;
+    )
+    public Set<Seat> seat = new HashSet<>();
 
-    @ManyToOne // indeed, Booking has a many to one relationship with user (booking objects have one user objects; user objects can have many booking objects) 
+    @ManyToOne
     public User user;
 
     // this shouldn't be used directly by our code because the database makes the id
@@ -41,52 +47,48 @@ public class Booking {
         this.id = id;
     }
 
-    public Booking(long concertId, LocalDateTime date, Set<Seat> seats, User user) { // contructor with all fields
+    public Booking(long concertId, LocalDateTime date, Set<Seat> seat, User user) { // contructor with all fields
         this.concertId = concertId;
         this.date = date;
-        this.seats = seats;
+        this.seat = seat;
         this.user = user;
     }
 
     public Booking(){}
 
     public Long getId() {
-        return this.id;
+        return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
     public long getConcertId() {
-        return this.concertId;
+        return concertId;
     }
 
     public void setConcertId(long concertId) {
         this.concertId = concertId;
     }
 
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
     public LocalDateTime getDate() {
-        return this.date;
+        return date;
     }
 
     public void setDate(LocalDateTime date) {
         this.date = date;
     }
 
-    public Set<Seat> getSeats() {
-        return this.seats;
-    }
-
-    public void setSeats(Set<Seat> seats) {
-        this.seats = seats;
+    public Set<Seat> getSeat() {
+        return seat;
     }
 
     public User getUser() {
-        return this.user;
+        return user;
     }
 
-    public void setUser(User user){
-        this.user = user;
-    }
+    public void setUser(String cookie){this.user = user;}
 }
