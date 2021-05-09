@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import javax.persistence.TypedQuery;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -89,8 +90,8 @@ public class SeatResource {
 
         try {
             em.getTransaction().begin();
-            
-            TypedQuery<Seat> seatQuery = em.createQuery(queryStringSeatOnDateWithStatus, Seat.class);
+
+            TypedQuery<Seat> seatQuery = em.createQuery(queryStringSeatOnDateWithStatus, Seat.class).setLockMode(LockModeType.PESSIMISTIC_READ);
             retrievedSeats = seatQuery.getResultList();
 
             em.getTransaction().commit();

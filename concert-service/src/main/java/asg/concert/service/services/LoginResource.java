@@ -8,6 +8,7 @@ import asg.concert.service.common.Config;
 import asg.concert.service.domain.User;
 
 import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import javax.persistence.TypedQuery;
 
 import javax.ws.rs.Consumes;
@@ -56,17 +57,17 @@ public class LoginResource {
         try {
             em.getTransaction().begin();
 
-            String queryString = String.format("select u from User u where u.username = '%s'", userDTO.getUsername()); 
-            TypedQuery<User> userQuery = em.createQuery(queryString, User.class);
+            String queryString = String.format("select u from User u where u.username = '%s'", userDTO.getUsername());
+            TypedQuery<User> userQuery = em.createQuery(queryString, User.class).setLockMode(LockModeType.PESSIMISTIC_READ);
             List<User> usersWithUsername = userQuery.getResultList();
-        
+
             if (usersWithUsername.size() == 0) {
                 LOGGER.info("User does not exist with this username");
                 em.getTransaction().commit();
                 em.close();
                 throw new WebApplicationException(Response.Status.UNAUTHORIZED);
             }
-            
+
             // assuming there's only one user with this username
             User user = usersWithUsername.get(0);
 
@@ -75,6 +76,7 @@ public class LoginResource {
                 em.getTransaction().commit();
                 em.close();
                 throw new WebApplicationException(Response.Status.UNAUTHORIZED);
+
             }
 
             // Generate token for user
@@ -141,7 +143,7 @@ public class LoginResource {
             em.getTransaction().begin();
 
             String queryString = String.format("select u from User u where u.token = '%s'", token);
-            TypedQuery<User> tokenQuery = em.createQuery(queryString, User.class);
+            TypedQuery<User> tokenQuery = em.createQuery(queryString, User.class).setLockMode(LockModeType.OPTIMISTIC_FORCE_INCREMENT);
             usersWithThatToken = tokenQuery.getResultList();
 
             em.getTransaction().commit();

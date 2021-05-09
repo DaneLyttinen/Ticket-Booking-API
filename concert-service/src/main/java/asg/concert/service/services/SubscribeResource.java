@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import javax.persistence.TypedQuery;
 
 import javax.ws.rs.Consumes;
@@ -54,7 +55,7 @@ public class SubscribeResource {
             em.getTransaction().begin();
             
             // Ensure concert with specified id exsists and at the specified date
-            TypedQuery<Concert> concertQuery = em.createQuery("select c from Concert c where id=" + concertInfoSubscriptionDTO.getConcertId(), Concert.class);
+            TypedQuery<Concert> concertQuery = em.createQuery("select c from Concert c where id=" + concertInfoSubscriptionDTO.getConcertId(), Concert.class).setLockMode(LockModeType.PESSIMISTIC_READ);
             List<Concert> concerts = concertQuery.getResultList();
 
             // if no concerts found with id or specified date, respond with error 400: bad request
@@ -95,7 +96,7 @@ public class SubscribeResource {
                 try {
                     em.getTransaction().begin();
 
-                    TypedQuery<Seat> seatQuery = em.createQuery("select s from Seat s where date='" + dateTimeStr + "'", Seat.class);
+                    TypedQuery<Seat> seatQuery = em.createQuery("select s from Seat s where date='" + dateTimeStr + "'", Seat.class).setLockMode(LockModeType.PESSIMISTIC_READ);
                     seats = seatQuery.getResultList();
 
                     em.getTransaction().commit();

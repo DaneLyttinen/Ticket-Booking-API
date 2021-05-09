@@ -9,9 +9,10 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    @Column(unique = true)
     private String username;
     private String password;
-    @Version  // honestly, don't know what the version field is for. Maybe it's something to do with the database, hence using this?
+    @Version
     private long version;
     private String token;
     

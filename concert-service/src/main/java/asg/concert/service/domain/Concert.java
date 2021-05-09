@@ -9,6 +9,8 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 
@@ -26,7 +28,7 @@ public class Concert {
     private String title;
     @Column(name = "IMAGE_NAME")
     private String imageName;
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
             name = "CONCERT_DATES",
             joinColumns = @JoinColumn(name = "CONCERT_ID"))
@@ -45,6 +47,7 @@ public class Concert {
             )
     )
     @ManyToMany(cascade = CascadeType.PERSIST)
+    @Fetch(FetchMode.SUBSELECT)
     private Set<Performer> performers = new HashSet<>();
 
     public Concert() {} // JPA needs a blank constructor

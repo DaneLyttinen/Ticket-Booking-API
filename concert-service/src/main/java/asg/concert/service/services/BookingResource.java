@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import javax.persistence.TypedQuery;
 
 import javax.ws.rs.*;
@@ -110,26 +111,24 @@ public class BookingResource {
         
         try {
             em.getTransaction().begin();
-
             // 2) Check the concert with the passed id exists, and that it is running on this date
-            Concert desiredConcertToBook = em.find(Concert.class, desiredConcertIdToBook);
+            Concert desiredConcertToBook = em.find(Concert.class, desiredConcertIdToBook, LockModeType.PESSIMISTIC_READ);
 
             if (desiredConcertToBook == null) { // also necessary to catch this here, so that we know the below can run (could to a try/except/etc. instead)
                 LOGGER.info(String.format("There does not exist a concert with the id '%d'. Throwing Response.Status.BAD_REQUEST", desiredConcertIdToBook));
                 throw new WebApplicationException(Response.Status.BAD_REQUEST);
             }
-
+            em.getTransaction().commit();
             if (! desiredConcertToBook.getDates().contains(desiredDateToBook)) {
                 LOGGER.info("The concert that the client is intending to book seats for is NOT scheduled on this date. Throwing Response.Status.BAD_REQUEST");
                 throw new WebApplicationException(Response.Status.BAD_REQUEST);
             }
-
-
+            em.getTransaction().begin();
             // 3) Get desired seats to book from databsae, and check that they are all "not booked"
             String requestDateTime = bookingRequestDTO.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")); // Format datetime into appropriate string for request
             String requestLabelsListAsString = "('" + String.join("', '", bookingRequestDTO.getSeatLabels()) + "')"; // Create string representation of seat labels for query. Example: "('A1', 'B2', 'C3')" 
             String queryString = String.format("select s from Seat s where date = '%s' and label in %s", requestDateTime, requestLabelsListAsString);
-            TypedQuery<Seat> seatQuery = em.createQuery(queryString, Seat.class);
+            TypedQuery<Seat> seatQuery = em.createQuery(queryString, Seat.class );
             List<Seat> desiredSeatsToBookFoundInDatabase = seatQuery.getResultList();
 
             for (Seat seat: desiredSeatsToBookFoundInDatabase) {
@@ -150,6 +149,7 @@ public class BookingResource {
                 seat.setBooked(true);
                 em.merge(seat);
                 LOGGER.info(String.format("Updated seat with id '%d' in database; it now has its isBooked field assigned true!", seat.getId()));
+
             }
 
             Set<Seat> desiredSeatsToBookFoundInDatabaseSet = new HashSet<>(desiredSeatsToBookFoundInDatabase); // Booking stores a set of seats, which makes sense - and we just got it out of the database as a list. This could be problematic.
@@ -157,7 +157,6 @@ public class BookingResource {
             
             em.persist(aBooking);
             LOGGER.info(String.format("Persisted (i.e. put in database for the first time) booking with id '%d'!", aBooking.getId()));
-
             em.getTransaction().commit();
         }
         finally {
@@ -220,7 +219,7 @@ public class BookingResource {
             em.getTransaction().begin();
 
             // 2) Get the booking information from the database 
-            Booking aBooking = em.find(Booking.class, id); // note: this has been lazily fetched (we don't want to actually go to the effort of getting the seat objects until we have authorised the user)
+            Booking aBooking = em.find(Booking.class, id, LockModeType.PESSIMISTIC_READ); // note: this has been lazily fetched (we don't want to actually go to the effort of getting the seat objects until we have authorised the user)
 
             if (aBooking == null) {
                 LOGGER.info("Booking does not exist with this id");
