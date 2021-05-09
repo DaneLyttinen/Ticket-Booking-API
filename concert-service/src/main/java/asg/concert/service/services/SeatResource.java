@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import javax.persistence.TypedQuery;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -50,7 +51,8 @@ public class SeatResource {
             em.getTransaction().begin();
             
             // get seats with specified date and status
-            TypedQuery<Seat> seatQuery = em.createQuery("select s from Seat s where Date='" + dateTime.toString() + "'" + queryBookedStatus, Seat.class);
+            TypedQuery<Seat> seatQuery = em.createQuery("select s from Seat s where Date='" + dateTime.toString() + "'" + queryBookedStatus, Seat.class)
+                    .setLockMode(LockModeType.PESSIMISTIC_READ);
             for (Seat seat: seatQuery.getResultList()) {
                 seatDTOs.add(Mapper.convertObj(seat, new TypeReference<SeatDTO>(){}));
             }

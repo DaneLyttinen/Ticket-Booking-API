@@ -88,7 +88,8 @@ public class BookingResource {
                 em.persist(seat);
                 seatsSet.add(seat);
             }
-            TypedQuery<User> userQuery = em.createQuery("select u from User u where cookie='" + clientId.getValue()+"'", User.class);
+            TypedQuery<User> userQuery = em.createQuery("select u from User u where cookie='" + clientId.getValue()+"'", User.class)
+                    .setLockMode(LockModeType.OPTIMISTIC);
             User user = userQuery.getSingleResult();
             // TODO: store this in database or something
             booking.seat = seatsSet;

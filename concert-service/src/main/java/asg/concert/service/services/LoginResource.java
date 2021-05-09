@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import javax.persistence.TypedQuery;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
@@ -34,13 +35,13 @@ public class LoginResource {
         User user = null;
         NewCookie cookie = null;
         try {
-
             // Start a new transaction.
             em.getTransaction().begin();
 
             // Use the EntityManager to retrieve, persist or delete object(s).
             // Use em.find(), em.persist(), em.merge(), etc...
-            TypedQuery<User> userQuery = em.createQuery("select u from User u where Username='" + userDTO.getUsername() + "'", User.class);
+            TypedQuery<User> userQuery = em.createQuery("select u from User u where Username='" + userDTO.getUsername() + "'", User.class)
+                    .setLockMode(LockModeType.OPTIMISTIC_FORCE_INCREMENT);
             List<User> users = userQuery.getResultList();
 
             // there should only ever be one user with a given username

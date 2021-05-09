@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import javax.persistence.TypedQuery;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -37,7 +38,7 @@ public class PerformerResource {
 
             // Use the EntityManager to retrieve, persist or delete object(s).
             // Use em.find(), em.persist(), em.merge(), etc...
-            performer = em.find(Performer.class, id);
+            performer = em.find(Performer.class, id, LockModeType.PESSIMISTIC_READ);
 
             // Commit the transaction.
             em.getTransaction().commit();
@@ -68,7 +69,8 @@ public class PerformerResource {
 
             // Start a new transaction.
             em.getTransaction().begin();
-            TypedQuery<Performer> performerQuery = em.createQuery("select p from Performer p", Performer.class);
+            TypedQuery<Performer> performerQuery = em.createQuery("select p from Performer p", Performer.class)
+                    .setLockMode(LockModeType.PESSIMISTIC_READ);
             List<Performer> performers = performerQuery.getResultList();
 
             for (Performer performer : performers){
