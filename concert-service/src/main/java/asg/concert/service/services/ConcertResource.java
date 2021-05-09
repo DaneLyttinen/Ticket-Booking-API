@@ -17,10 +17,11 @@ import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.NewCookie;
+import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -109,7 +110,8 @@ public class ConcertResource {
             em.close();
         }
 
-        return Response.status(Response.Status.OK).entity(concertDTOs).build();
+        GenericEntity<List<ConcertDTO>> anEntity = new GenericEntity<List<ConcertDTO>>(concertDTOs) {};
+        return Response.status(Response.Status.OK).entity(anEntity).build();
     }
 
     /**
@@ -147,7 +149,8 @@ public class ConcertResource {
             em.close();
         }
         
-        return Response.status(Response.Status.OK).entity(concertSummariesDTO).build();
+        GenericEntity<List<ConcertSummaryDTO>> anEntity = new GenericEntity<List<ConcertSummaryDTO>>(concertSummariesDTO) {};
+        return Response.status(Response.Status.OK).entity(anEntity).build();
     }
 
 }
