@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
 @Entity
+@Table(name = "seats") // although db_init.sql doesn't say it, going by the convention they've been using
 public class Seat {
 
 	@Id
@@ -27,7 +28,7 @@ public class Seat {
 	}
 
 	public Seat(String label, boolean isBooked, LocalDateTime date, BigDecimal price) {
-		this(null,label, isBooked, date, price);
+		this(null, label, isBooked, date, price);
 	}
 
 	public long getId() {

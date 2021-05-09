@@ -20,13 +20,13 @@ public class Mapper {
         return new ConcertSummaryDTO(
                 concert.getId(),
                 concert.getTitle(),
-                concert.getImage_name()
+                concert.getImageName()
         );
     }
 
     public static BookingDTO convertBooking(Booking booking){
         List<SeatDTO> seatDTOSet = new ArrayList<>();
-        for (Seat seat : booking.getSeat()){
+        for (Seat seat : booking.getSeats()) {
             SeatDTO seatDTO = Mapper.convertObj(seat, new TypeReference<SeatDTO>(){});
             seatDTOSet.add(seatDTO);
         }

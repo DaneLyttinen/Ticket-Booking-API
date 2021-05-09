@@ -44,7 +44,7 @@ public class ConcertResource {
      */
     @GET
     @Path("{id}")
-    @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response retrieveConcert(@PathParam("id") long id) {
         LOGGER.info("Retrieving concert with id: " + id);
         EntityManager em = PersistenceManager.instance().createEntityManager();
@@ -81,7 +81,7 @@ public class ConcertResource {
      * of a list of ConcertDTOs. You don't have to be authenticated 
      * (and hence don't have to be authorised) to do this.
      * 
-     * There's no possibility error that can happen, i.e., if no performers
+     * There's no possibility that an error can happen, i.e., if no performers
      * exist, this just returns a empty list. So no error can be thrown by
      * this method. (Unless there's a mistake with the code)
      */
@@ -119,7 +119,7 @@ public class ConcertResource {
      * of a list of ConcertSummaryDTOs. You don't have to be authenticated 
      * (and hence don't have to be authorised) to do this.
      * 
-     * There's no possibility error that can happen, i.e., if no performers
+     * There's no possibility that an error can happen, i.e., if no performers
      * exist, this just returns a empty list. So no error can be thrown by
      * this method. (Unless there's a mistake with the code)
      */
