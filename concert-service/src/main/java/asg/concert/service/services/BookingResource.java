@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import javax.persistence.TypedQuery;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Cookie;
@@ -50,7 +51,7 @@ public class BookingResource {
             em.getTransaction().begin();
 
             // Ensure concert with specified id exsists and at the specified date
-            TypedQuery<Concert> concertQuery = em.createQuery("select c from Concert c where id=" + bookingRequestDTO.getConcertId(), Concert.class);
+            TypedQuery<Concert> concertQuery = em.createQuery("select c from Concert c where id=" + bookingRequestDTO.getConcertId(), Concert.class).setLockMode(LockModeType.PESSIMISTIC_READ);
             List<Concert> concerts = concertQuery.getResultList();
 
             // if no concerts found with id or specified date, respond with error 400: bad request
@@ -67,7 +68,7 @@ public class BookingResource {
             String requestDateTime = bookingRequestDTO.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
             // get all seats in booking query
-            TypedQuery<Seat> seatQuery = em.createQuery("select s from Seat s where date='" + requestDateTime + "' and label in " + requestLabelsList, Seat.class);
+            TypedQuery<Seat> seatQuery = em.createQuery("select s from Seat s where date='" + requestDateTime + "' and label in " + requestLabelsList, Seat.class).setLockMode(LockModeType.PESSIMISTIC_READ);
             List<Seat> seats = seatQuery.getResultList();
             Set<Seat> seatsSet = new HashSet<>();
             // if any of the seats are already booked, respond with error 403: forbidden
@@ -163,7 +164,7 @@ public class BookingResource {
 
             // Start a new transaction.
             em.getTransaction().begin();
-            booking = em.find(Booking.class, id);
+            booking = em.find(Booking.class, id, LockModeType.PESSIMISTIC_READ);
             TypedQuery<User> userQuery = em.createQuery("select u from User u where cookie='" + clientId.getValue() + "'", User.class);
             User user = userQuery.getSingleResult();
             //LOGGER.info("Attempting to get booking with (cookie: " + booking.getCookie() + ") with user " + clientId.getValue() );
