@@ -219,7 +219,7 @@ public class BookingResource {
             em.getTransaction().begin();
 
             // 2) Get the booking information from the database 
-            Booking aBooking = em.find(Booking.class, id, LockModeType.PESSIMISTIC_READ); // note: this has been lazily fetched (we don't want to actually go to the effort of getting the seat objects until we have authorised the user)
+            Booking aBooking = em.find(Booking.class, id, LockModeType.PESSIMISTIC_READ); // note, this has been eagerly fetched, so the below need not be here
 
             if (aBooking == null) {
                 LOGGER.info("Booking does not exist with this id");

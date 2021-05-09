@@ -137,7 +137,7 @@ public class LoginResource {
         // get users with that token from database
         EntityManager em = PersistenceManager.instance().createEntityManager();
 
-        List<User> usersWithThatToken = null;
+        List<User> usersWithThatToken;
 
         try {
             em.getTransaction().begin();
