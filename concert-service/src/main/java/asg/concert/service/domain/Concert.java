@@ -26,8 +26,7 @@ public class Concert {
     @Column(columnDefinition="text")
     private String blurb;
     private String title;
-    @JsonSetter("imageName")
-    @Column(name = "image_name")
+    @Column(name = "IMAGE_NAME")
     private String imageName;
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
@@ -51,28 +50,27 @@ public class Concert {
     @Fetch(FetchMode.SUBSELECT)
     private Set<Performer> performers = new HashSet<>();
 
-    public Concert(Long id, String title, String image_name, Set<LocalDateTime> dates, Set<Performer> performer, String blurb) {
+    public Concert() {} // JPA needs a blank constructor
+
+    // this shouldn't be used directly by our code because the database makes the id
+    public Concert(Long id, String title, String imageName, Set<LocalDateTime> dates, Set<Performer> performer, String blurb) {
         this.id = id;
         this.title = title;
-        this.imageName = image_name;
+        this.imageName = imageName;
         this.dates = dates;
         this.performers = performer;
         this.blurb = blurb;
     }
 
-    public Concert(String title,String image_name, Set<LocalDateTime> dates, Set<Performer> performer, String blurb) {
-        this(null, title,image_name, dates, performer, blurb);
+    public Concert(String title, String imageName, Set<LocalDateTime> dates, Set<Performer> performer, String blurb) {
+        this(null, title, imageName, dates, performer, blurb);
     }
 
-    public Concert() {
+    public void setImageName(String imageName) {
+        this.imageName = imageName;
     }
 
-    public void setImage_name(String image_name) {
-        this.imageName = image_name;
-    }
-
-    @JsonGetter("imageName")
-    public String getImage_name() {
+    public String getImageName() {
         return imageName;
     }
 
@@ -92,7 +90,7 @@ public class Concert {
         this.title = title;
     }
 
-    @JsonDeserialize(contentUsing = LocalDateTimeDeserializer.class)
+    @JsonDeserialize(contentUsing = LocalDateTimeDeserializer.class) // This is used by our Mapper class
     @JsonSerialize(contentUsing = LocalDateTimeSerializer.class)
     public Set<LocalDateTime> getDates() {
         return dates;

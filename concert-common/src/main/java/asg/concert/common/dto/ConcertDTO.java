@@ -1,11 +1,10 @@
 package asg.concert.common.dto;
 
-import asg.concert.common.jackson.*;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import asg.concert.common.jackson.LocalDateTimeSerializer;
+import asg.concert.common.jackson.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import javax.persistence.ElementCollection;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -28,7 +27,6 @@ public class ConcertDTO {
     private String title;
     private String imageName;
     private String blurb;
-    @ElementCollection
     private List<LocalDateTime> dates = new ArrayList<>();
     private List<PerformerDTO> performers = new ArrayList<>();
 
