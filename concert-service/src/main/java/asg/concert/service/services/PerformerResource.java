@@ -45,14 +45,9 @@ public class PerformerResource {
 
         try {
             em.getTransaction().begin();
-
-<<<<<<< HEAD
             // Use the EntityManager to retrieve, persist or delete object(s).
             // Use em.find(), em.persist(), em.merge(), etc...
             performer = em.find(Performer.class, id, LockModeType.PESSIMISTIC_READ);
-=======
-            performer = em.find(Performer.class, id);
->>>>>>> master
 
             em.getTransaction().commit();
         } finally {
@@ -88,13 +83,8 @@ public class PerformerResource {
 
         try {
             em.getTransaction().begin();
-<<<<<<< HEAD
             TypedQuery<Performer> performerQuery = em.createQuery("select p from Performer p", Performer.class)
                     .setLockMode(LockModeType.PESSIMISTIC_READ);
-=======
-
-            TypedQuery<Performer> performerQuery = em.createQuery("select p from Performer p", Performer.class);
->>>>>>> master
             List<Performer> performers = performerQuery.getResultList();
 
             // Convert to list of performer DTOs

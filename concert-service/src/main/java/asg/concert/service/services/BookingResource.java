@@ -111,49 +111,27 @@ public class BookingResource {
         
         try {
             em.getTransaction().begin();
-
-<<<<<<< HEAD
-            // Ensure concert with specified id exsists and at the specified date
-            TypedQuery<Concert> concertQuery = em.createQuery("select c from Concert c where id=" + bookingRequestDTO.getConcertId(), Concert.class).setLockMode(LockModeType.PESSIMISTIC_READ);
-            List<Concert> concerts = concertQuery.getResultList();
-=======
             // 2) Check the concert with the passed id exists, and that it is running on this date
-            Concert desiredConcertToBook = em.find(Concert.class, desiredConcertIdToBook);
+            Concert desiredConcertToBook = em.find(Concert.class, desiredConcertIdToBook, LockModeType.PESSIMISTIC_READ);
 
             if (desiredConcertToBook == null) { // also necessary to catch this here, so that we know the below can run (could to a try/except/etc. instead)
                 LOGGER.info(String.format("There does not exist a concert with the id '%d'. Throwing Response.Status.BAD_REQUEST", desiredConcertIdToBook));
                 throw new WebApplicationException(Response.Status.BAD_REQUEST);
             }
->>>>>>> master
 
             if (! desiredConcertToBook.getDates().contains(desiredDateToBook)) {
                 LOGGER.info("The concert that the client is intending to book seats for is NOT scheduled on this date. Throwing Response.Status.BAD_REQUEST");
                 throw new WebApplicationException(Response.Status.BAD_REQUEST);
             }
 
-<<<<<<< HEAD
-            // Create string representation of seat labels for query. Example: "('A1', 'B2', 'C3')" 
-            String requestLabelsList = "('" + String.join("', '", bookingRequestDTO.getSeatLabels()) + "')";
-            // Format datetime into appropriate string for request
-            String requestDateTime = bookingRequestDTO.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-
-            // get all seats in booking query
-            TypedQuery<Seat> seatQuery = em.createQuery("select s from Seat s where date='" + requestDateTime + "' and label in " + requestLabelsList, Seat.class).setLockMode(LockModeType.PESSIMISTIC_WRITE);
-            List<Seat> seats = seatQuery.getResultList();
-            Set<Seat> seatsSet = new HashSet<>();
-            // if any of the seats are already booked, respond with error 403: forbidden
-            for (Seat seat: seats) {
-=======
-
             // 3) Get desired seats to book from databsae, and check that they are all "not booked"
             String requestDateTime = bookingRequestDTO.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")); // Format datetime into appropriate string for request
             String requestLabelsListAsString = "('" + String.join("', '", bookingRequestDTO.getSeatLabels()) + "')"; // Create string representation of seat labels for query. Example: "('A1', 'B2', 'C3')" 
             String queryString = String.format("select s from Seat s where date = '%s' and label in %s", requestDateTime, requestLabelsListAsString);
-            TypedQuery<Seat> seatQuery = em.createQuery(queryString, Seat.class);
+            TypedQuery<Seat> seatQuery = em.createQuery(queryString, Seat.class).setLockMode(LockModeType.PESSIMISTIC_WRITE);
             List<Seat> desiredSeatsToBookFoundInDatabase = seatQuery.getResultList();
 
             for (Seat seat: desiredSeatsToBookFoundInDatabase) {
->>>>>>> master
                 if (seat.isBooked()) {
                     LOGGER.info(String.format("A seat that the client desires to book (seat label : %s) is booked already! We can't book a seat that is already booked, nor can we book any seats if we can't book them all (i.e. aka, we can't make a 'partial booking'). So throwing Response.Status.FORBIDDEN", seat.getLabel()));
                     throw new WebApplicationException(Response.Status.FORBIDDEN);
@@ -172,27 +150,12 @@ public class BookingResource {
                 em.merge(seat);
                 LOGGER.info(String.format("Updated seat with id '%d' in database; it now has its isBooked field assigned true!", seat.getId()));
             }
-<<<<<<< HEAD
-            TypedQuery<User> userQuery = em.createQuery("select u from User u where cookie='" + clientId.getValue()+"'", User.class)
-                    .setLockMode(LockModeType.OPTIMISTIC);
-            User user = userQuery.getSingleResult();
-            // TODO: store this in database or something
-            booking.seat = seatsSet;
-            booking.user = user;
-            booking.date = bookingRequestDTO.getDate();
-            booking.setConcertId(bookingRequestDTO.getConcertId());
-            //Booking booking = new Booking(id, bookingRequestDTO.getConcertId(), bookingRequestDTO.getDate(), seatsSet, clientId.getValue());
-            em.persist(booking);
-            id = booking.getId();
-=======
 
             Set<Seat> desiredSeatsToBookFoundInDatabaseSet = new HashSet<>(desiredSeatsToBookFoundInDatabase); // Booking stores a set of seats, which makes sense - and we just got it out of the database as a list. This could be problematic.
             aBooking = new Booking(desiredConcertIdToBook, desiredDateToBook, desiredSeatsToBookFoundInDatabaseSet, userMakingBooking);
             
             em.persist(aBooking);
             LOGGER.info(String.format("Persisted (i.e. put in database for the first time) booking with id '%d'!", aBooking.getId()));
-
->>>>>>> master
             em.getTransaction().commit();
         }
         finally {
@@ -313,18 +276,10 @@ public class BookingResource {
 
         try {
             em.getTransaction().begin();
-<<<<<<< HEAD
-            booking = em.find(Booking.class, id, LockModeType.PESSIMISTIC_READ);
-            TypedQuery<User> userQuery = em.createQuery("select u from User u where cookie='" + clientId.getValue() + "'", User.class);
-            User user = userQuery.getSingleResult();
-            //LOGGER.info("Attempting to get booking with (cookie: " + booking.getCookie() + ") with user " + clientId.getValue() );
-            if (user != booking.user){
-                return Response.status(403).build();
-=======
 
             // 2) Get all bookings done by that user
             String queryString = String.format("select b from Booking b where b.user = '%d'", authenticatedUser.getId());
-            TypedQuery<Booking> bookingQuery = em.createQuery(queryString, Booking.class);
+            TypedQuery<Booking> bookingQuery = em.createQuery(queryString, Booking.class).setLockMode(LockModeType.PESSIMISTIC_WRITE);
             List<Booking> bookings = bookingQuery.getResultList();
 
             // 3) Convert to a list of BookingDTOs
@@ -332,7 +287,6 @@ public class BookingResource {
             for (Booking booking : bookings){
                 aBookingDTO = Mapper.convertBooking(booking);
                 bookingDTOs.add(aBookingDTO);
->>>>>>> master
             }
 
             em.getTransaction().commit();

@@ -51,44 +51,23 @@ public class LoginResource {
         LOGGER.info(String.format("Logging in user with username '%s'...", userDTO.getUsername()));
 
         EntityManager em = PersistenceManager.instance().createEntityManager();
-<<<<<<< HEAD
-        User user = null;
-        NewCookie cookie = null;
-        try {
-            // Start a new transaction.
-            em.getTransaction().begin();
-
-            // Use the EntityManager to retrieve, persist or delete object(s).
-            // Use em.find(), em.persist(), em.merge(), etc...
-            TypedQuery<User> userQuery = em.createQuery("select u from User u where Username='" + userDTO.getUsername() + "'", User.class)
-                    .setLockMode(LockModeType.OPTIMISTIC_FORCE_INCREMENT);
-            List<User> users = userQuery.getResultList();
-
-            // there should only ever be one user with a given username
-            // check the passowrd matches
-            if (users.size() == 1 && users.get(0).getPassword().equals(userDTO.getPassword())) {
-                user = users.get(0);
-                cookie = makeCookie(null);
-                user.setCookie(cookie.getValue());
-                em.merge(user);
-=======
 
         String token = null;
 
         try {
             em.getTransaction().begin();
 
-            String queryString = String.format("select u from User u where u.username = '%s'", userDTO.getUsername()); 
+            String queryString = String.format("select u from User u where u.username = '%s'", userDTO.getUsername());
             TypedQuery<User> userQuery = em.createQuery(queryString, User.class);
             List<User> usersWithUsername = userQuery.getResultList();
-        
+
             if (usersWithUsername.size() == 0) {
                 LOGGER.info("User does not exist with this username");
                 em.getTransaction().commit();
                 em.close();
                 throw new WebApplicationException(Response.Status.UNAUTHORIZED);
             }
-            
+
             // assuming there's only one user with this username
             User user = usersWithUsername.get(0);
 
@@ -97,7 +76,7 @@ public class LoginResource {
                 em.getTransaction().commit();
                 em.close();
                 throw new WebApplicationException(Response.Status.UNAUTHORIZED);
->>>>>>> master
+
             }
 
             // Generate token for user
@@ -164,7 +143,7 @@ public class LoginResource {
             em.getTransaction().begin();
 
             String queryString = String.format("select u from User u where u.token = '%s'", token);
-            TypedQuery<User> tokenQuery = em.createQuery(queryString, User.class);
+            TypedQuery<User> tokenQuery = em.createQuery(queryString, User.class).setLockMode(LockModeType.OPTIMISTIC_FORCE_INCREMENT);
             usersWithThatToken = tokenQuery.getResultList();
 
             em.getTransaction().commit();

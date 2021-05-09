@@ -23,11 +23,7 @@ public class Booking {
     private long id;
     public LocalDateTime date;
     private long concertId;
-<<<<<<< HEAD
     @OneToMany(fetch = FetchType.EAGER)
-=======
-    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
->>>>>>> master
     @JoinTable(
             name = "BOOKING_SEAT",
             joinColumns = @JoinColumn(
@@ -41,11 +37,7 @@ public class Booking {
     )
     public Set<Seat> seats;
 
-<<<<<<< HEAD
     @ManyToOne()
-=======
-    @ManyToOne
->>>>>>> master
     public User user;
 
     // this shouldn't be used directly by our code because the database makes the id

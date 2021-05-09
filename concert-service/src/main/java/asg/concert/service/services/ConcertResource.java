@@ -97,13 +97,8 @@ public class ConcertResource {
 
         try {
             em.getTransaction().begin();
-<<<<<<< HEAD
             TypedQuery<Concert> concertQuery = em.createQuery("select c from Concert c", Concert.class)
                     .setLockMode(LockModeType.PESSIMISTIC_READ);
-=======
-
-            TypedQuery<Concert> concertQuery = em.createQuery("select c from Concert c", Concert.class);
->>>>>>> master
             List<Concert> concerts = concertQuery.getResultList();
             
             // Convert to list of performer DTOs
@@ -141,13 +136,8 @@ public class ConcertResource {
 
         try {
             em.getTransaction().begin();
-<<<<<<< HEAD
-            TypedQuery<Concert> concertQuery = em.createQuery("select c from Concert c", Concert.class)
-                    .setLockMode(LockModeType.PESSIMISTIC_READ);
-=======
 
-            TypedQuery<Concert> concertQuery = em.createQuery("select c from Concert c", Concert.class); 
->>>>>>> master
+            TypedQuery<Concert> concertQuery = em.createQuery("select c from Concert c", Concert.class).setLockMode(LockModeType.PESSIMISTIC_READ);
             List<Concert> concerts = concertQuery.getResultList();
 
             // Convert to a list of ConcertSummaryDTOs

@@ -90,18 +90,9 @@ public class SeatResource {
 
         try {
             em.getTransaction().begin();
-            
-<<<<<<< HEAD
-            // get seats with specified date and status
-            TypedQuery<Seat> seatQuery = em.createQuery("select s from Seat s where Date='" + dateTime.toString() + "'" + queryBookedStatus, Seat.class)
-                    .setLockMode(LockModeType.PESSIMISTIC_READ);
-            for (Seat seat: seatQuery.getResultList()) {
-                seatDTOs.add(Mapper.convertObj(seat, new TypeReference<SeatDTO>(){}));
-            }
-=======
-            TypedQuery<Seat> seatQuery = em.createQuery(queryStringSeatOnDateWithStatus, Seat.class);
+
+            TypedQuery<Seat> seatQuery = em.createQuery(queryStringSeatOnDateWithStatus, Seat.class).setLockMode(LockModeType.PESSIMISTIC_READ);
             retrievedSeats = seatQuery.getResultList();
->>>>>>> master
 
             em.getTransaction().commit();
         } finally {
