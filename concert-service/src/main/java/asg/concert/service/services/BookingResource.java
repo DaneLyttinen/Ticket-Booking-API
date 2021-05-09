@@ -68,7 +68,7 @@ public class BookingResource {
             String requestDateTime = bookingRequestDTO.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
             // get all seats in booking query
-            TypedQuery<Seat> seatQuery = em.createQuery("select s from Seat s where date='" + requestDateTime + "' and label in " + requestLabelsList, Seat.class).setLockMode(LockModeType.PESSIMISTIC_READ);
+            TypedQuery<Seat> seatQuery = em.createQuery("select s from Seat s where date='" + requestDateTime + "' and label in " + requestLabelsList, Seat.class).setLockMode(LockModeType.PESSIMISTIC_WRITE);
             List<Seat> seats = seatQuery.getResultList();
             Set<Seat> seatsSet = new HashSet<>();
             // if any of the seats are already booked, respond with error 403: forbidden
