@@ -15,16 +15,15 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name="Bookings")
+@Table(name="bookings") // don't need to name the table this, but nice to follow the convention of the others
 public class Booking {
 
     @Id
-    // remove this if using explicit id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     public LocalDateTime date;
     private long concertId;
-    @OneToMany(cascade = CascadeType.PERSIST)
+    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     @JoinTable(
             name = "BOOKING_SEAT",
             joinColumns = @JoinColumn(
@@ -36,21 +35,22 @@ public class Booking {
                     referencedColumnName = "ID"
             )
     )
-    public Set<Seat> seat = new HashSet<>();
+    public Set<Seat> seats;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne
     public User user;
 
-    public Booking(Long id, long concertId,LocalDateTime date, Set<Seat> seat, User user){
+    // this shouldn't be used directly by our code because the database makes the id
+    public Booking(long id, long concertId,LocalDateTime date, Set<Seat> seats, User user){ // constructor with all fields including id
+        this(concertId, date, seats, user);
         this.id = id;
-        this.concertId = concertId;
-        this.date = date;
-        this.seat = seat;
-        this.user = user;
     }
 
-    public Booking(long concertId, LocalDateTime date, Set<Seat> seat, User user) {
-        this(null, concertId, date, seat, user);
+    public Booking(long concertId, LocalDateTime date, Set<Seat> seats, User user) { // contructor with all fields
+        this.concertId = concertId;
+        this.date = date;
+        this.seats = seats;
+        this.user = user;
     }
 
     public Booking(){}
@@ -71,8 +71,8 @@ public class Booking {
         this.concertId = concertId;
     }
 
-    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class) // This is used by our Mapper class (i.e. we don't give our client instances of Booking domain model)
+    @JsonSerialize(using = LocalDateTimeSerializer.class) // ^
     public LocalDateTime getDate() {
         return date;
     }
@@ -81,13 +81,19 @@ public class Booking {
         this.date = date;
     }
 
-    public Set<Seat> getSeat() {
-        return seat;
+    public void setSeats(Set<Seat> seats) {
+        this.seats = seats;
+    }
+
+    public Set<Seat> getSeats() {
+        return seats;
     }
 
     public User getUser() {
         return user;
     }
 
-    public void setUser(String cookie){this.user = user;}
+    public void setUser(User user) {
+        this.user = user;
+    }
 }
