@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import javax.persistence.TypedQuery;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Cookie;
@@ -45,7 +46,7 @@ public class ConcertResource {
             
             // Use the EntityManager to retrieve, persist or delete object(s).
             // Use em.find(), em.persist(), em.merge(), etc...
-            concert = em.find(Concert.class, id);
+            concert = em.find(Concert.class, id, LockModeType.PESSIMISTIC_READ);
 
             // Had to move back the mapper as otherwise we would get a LazyLoadException with Dates.
             // As we are in a try block, if concert couldn't be found it will just stay as null
@@ -77,7 +78,8 @@ public class ConcertResource {
 
             // Start a new transaction.
             em.getTransaction().begin();
-            TypedQuery<Concert> concertQuery = em.createQuery("select c from Concert c", Concert.class);
+            TypedQuery<Concert> concertQuery = em.createQuery("select c from Concert c", Concert.class)
+                    .setLockMode(LockModeType.PESSIMISTIC_READ);
             List<Concert> concerts = concertQuery.getResultList();
             
             for (Concert concert : concerts){
@@ -108,7 +110,8 @@ public class ConcertResource {
         try {
             // start a new transaction
             em.getTransaction().begin();
-            TypedQuery<Concert> concertQuery = em.createQuery("select c from Concert c", Concert.class);
+            TypedQuery<Concert> concertQuery = em.createQuery("select c from Concert c", Concert.class)
+                    .setLockMode(LockModeType.PESSIMISTIC_READ);
             List<Concert> concerts = concertQuery.getResultList();
 
             // create a summary for each concert

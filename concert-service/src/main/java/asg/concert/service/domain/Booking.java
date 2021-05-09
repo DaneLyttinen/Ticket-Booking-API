@@ -24,7 +24,7 @@ public class Booking {
     private long id;
     public LocalDateTime date;
     private long concertId;
-    @OneToMany(cascade = CascadeType.PERSIST)
+    @OneToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "BOOKING_SEAT",
             joinColumns = @JoinColumn(
@@ -38,7 +38,7 @@ public class Booking {
     )
     public Set<Seat> seat = new HashSet<>();
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne()
     public User user;
 
     public Booking(Long id, long concertId,LocalDateTime date, Set<Seat> seat, User user){
