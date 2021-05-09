@@ -58,7 +58,7 @@ public class LoginResource {
             em.getTransaction().begin();
 
             String queryString = String.format("select u from User u where u.username = '%s'", userDTO.getUsername());
-            TypedQuery<User> userQuery = em.createQuery(queryString, User.class);
+            TypedQuery<User> userQuery = em.createQuery(queryString, User.class).setLockMode(LockModeType.PESSIMISTIC_READ);
             List<User> usersWithUsername = userQuery.getResultList();
 
             if (usersWithUsername.size() == 0) {
