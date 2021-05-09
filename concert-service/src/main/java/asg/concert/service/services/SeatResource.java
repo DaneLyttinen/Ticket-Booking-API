@@ -82,8 +82,6 @@ public class SeatResource {
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
         }
 
-        List<SeatDTO> seatDTOs = new ArrayList<>();
-
         EntityManager em = PersistenceManager.instance().createEntityManager();
 
         List<Seat> retrievedSeats = null;
@@ -107,6 +105,6 @@ public class SeatResource {
         }
 
         GenericEntity<List<SeatDTO>> anEntity = new GenericEntity<List<SeatDTO>>(retrievedSeatsDTO) {}; // So type information is preserved
-        return Response.status(Response.Status.OK).entity(retrievedSeatsDTO).build();
+        return Response.status(Response.Status.OK).entity(anEntity).build();
     }
 }

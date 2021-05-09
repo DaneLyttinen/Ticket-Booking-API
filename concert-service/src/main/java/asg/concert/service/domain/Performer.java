@@ -3,8 +3,6 @@ package asg.concert.service.domain;
 import asg.concert.common.types.Genre;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
-import java.util.Set;
 
 @Entity
 @Table(name="performers")

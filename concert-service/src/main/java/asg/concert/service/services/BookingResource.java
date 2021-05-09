@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.concurrent.atomic.AtomicLong;
 
 import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
@@ -16,14 +15,11 @@ import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.Provider;
 
 import asg.concert.common.dto.BookingDTO;
-import asg.concert.common.dto.ConcertDTO;
 import asg.concert.service.domain.Booking;
 import asg.concert.service.domain.User;
 import asg.concert.service.mapper.Mapper;
-import com.fasterxml.jackson.core.type.TypeReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
