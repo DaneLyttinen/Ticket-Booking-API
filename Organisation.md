@@ -10,7 +10,7 @@
 - Rory and Dane worked on the project 1-2 weeks before Nathan, hence why there's no commit messages on Master from Nathan until the end. However, Nathan ended up playing an en equally valuable role in the team, by doing the entire project on his own branch (up until publish / subscribe) tests, so that he could bring insights over to the team on the Master, e.g., pointing out forgotten JPA annotations, or a better way to do implement token based authentication.
 - Throughout the project, all team members had many discussions with the team.
 
-- Although we all touched on similiar parts of the code, we each did parts by ourselves:
+- Although we all touched on similiar parts of the code, there were some parts down individually:
   - Dane's work notably included: figuring out how to minimise concurrency errors
   - Rory's work notably included: doing publish / subscribe request handlers.
   - Nathan's work notably included: making a pass over all of the code on master to clean up the code, add documentation to request handlers, and making logs consistent.
